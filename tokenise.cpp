@@ -29,11 +29,11 @@ oper_t massive_op[NUM_OPER] = {
     return NULL;                                                                                    \
 
 
-Node_t* Tokenize(void)
+Node_t** Tokenize(char** massive_var)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
     Node_t* massive_tokenov[1000] = {};
-    char* massive_var[100] = {};
+    char var[100] = {};
 
     double num = 0;
     int num_var = 0, skip = 0;
@@ -47,7 +47,7 @@ Node_t* Tokenize(void)
 
     fread(massive_code, sizeof(char), (size_t)stat1.st_size, fp);
 
-    for (int position = 0, i = 0; massive_code[position] == '\0'; i++)
+    for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
         bool found = false;
 
@@ -69,15 +69,27 @@ Node_t* Tokenize(void)
                 break;
             }
         }
-        
-        for (int j = 0; j < num_var && found == false; j++)
+
+        if (found == false && sscanf(&massive_code[position], "[A-Za-z0-9_]%n", var, &skip) != 0)
         {
-            if (strncmp(&massive_code[position], massive_var[j], skip) == 0)
+            position += skip;
+
+            for (int j = 0; j < num_var && found == false; j++)
             {
-                position += skip;
-                massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
+                if (strncmp(var, massive_var[j], skip) == 0)
+                {
+                    massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                massive_var[num_var] = strdup(var);
+                massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = num_var});
+                num_var++;
                 found = true;
-                break;
             }
         }
         
@@ -86,4 +98,6 @@ Node_t* Tokenize(void)
             ERROR(__FILE__, __func__, __LINE__)
         }
     }
+
+    return massive_tokenov;
 }

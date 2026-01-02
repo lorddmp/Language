@@ -3,6 +3,6 @@
 
 #include "structs_defines_types.h"
 
-Node_t* Tokenize(void);
+Node_t** Tokenize(char** mas_var);
 
 #endif
