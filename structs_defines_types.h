@@ -28,6 +28,7 @@ enum type_codes{
 };
 
 enum oper_codes{
+    END_CODE = 666,
     ADD_CODE = 1,
     SUB_CODE = 2,
     MUL_CODE = 3,
@@ -67,7 +68,7 @@ struct Node_t {
     value_dif value;
 };
 
-struct differentiator_t {
+struct tree_t {
     int num_var;
     Node_t* root_node;
     hash* hash_table;

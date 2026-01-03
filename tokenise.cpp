@@ -1,9 +1,10 @@
 #include "tokenise.h"
+#include "tech_func.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-#include "tech_func.h"
+#include <string.h>
 
 oper_t massive_op[NUM_OPER] = {
     {"+",           ADD_CODE,           1},
@@ -13,6 +14,7 @@ oper_t massive_op[NUM_OPER] = {
     {"^",           STEPEN_CODE,        1},
     {"(",           OPEN_BRAC_CODE,     1},
     {")",           CLOSED_BRAC_CODE,   1},
+
     {"sin",         SIN_CODE,           3},
     {"cos",         COS_CODE,           3},
     {"tan",         TAN_CODE,           3},
@@ -32,14 +34,13 @@ oper_t massive_op[NUM_OPER] = {
 Node_t** Tokenize(char** massive_var)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
-    Node_t* massive_tokenov[1000] = {};
+    Node_t** massive_tokenov = (Node_t**)calloc(1000, sizeof(Node_t*));
     char var[100] = {};
 
     double num = 0;
-    int num_var = 0, skip = 0;
+    int num_var = 0, skip = 0, count = 0;
     struct stat stat1 = {};
     int descriptor = fileno(fp);
-    int position = 0;
 
     fstat(descriptor, &stat1);
 
@@ -50,7 +51,10 @@ Node_t** Tokenize(char** massive_var)
     for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
         bool found = false;
+        count = i + 1;
 
+        printf("position = %d\n", position);
+        printf("symb = %c\n", massive_code[position]);
         if (sscanf(&massive_code[position], "%lg%n", &num, &skip) != 0)
         {
             massive_tokenov[i] = Make_Node(NUM_CODE, {.num_t = num});
@@ -59,24 +63,24 @@ Node_t** Tokenize(char** massive_var)
             continue;
         }
 
-        for (int j = 0; i < NUM_OPER && found == false; j++)
+        for (int j = 0; j < NUM_OPER && found == false; j++)
         {
-            if (strncmp(&massive_code[position], massive_op[i].op_symb, (size_t)massive_op[i].len) == 0 && massive_code[position + massive_op[i].len] == '(')
+            if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0) // пока что переменная sinus будет sin и переменная us
             {
-                position +=  massive_op[i].len;
-                massive_tokenov[i] = Make_Node(OPER_CODE, {.op_code_t = massive_op[i].op_code});
+                position += massive_op[j].len;
+                massive_tokenov[i] = Make_Node(OPER_CODE, {.op_code_t = massive_op[j].op_code});
                 found = true;
                 break;
             }
         }
 
-        if (found == false && sscanf(&massive_code[position], "[A-Za-z0-9_]%n", var, &skip) != 0)
+        if (found == false && sscanf(&massive_code[position], "%[A-Za-z0-9_]%n", var, &skip) != 0)
         {
             position += skip;
 
             for (int j = 0; j < num_var && found == false; j++)
             {
-                if (strncmp(var, massive_var[j], skip) == 0)
+                if (strncmp(var, massive_var[j], (size_t)skip) == 0)
                 {
                     massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
                     found = true;
@@ -99,5 +103,6 @@ Node_t** Tokenize(char** massive_var)
         }
     }
 
+    massive_tokenov[count] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
     return massive_tokenov;
 }
