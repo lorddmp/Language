@@ -14,6 +14,7 @@ oper_t massive_op[NUM_OPER] = {
     {"^",           STEPEN_CODE,        1},
     {"(",           OPEN_BRAC_CODE,     1},
     {")",           CLOSED_BRAC_CODE,   1},
+    {"==",          DOUBLE_EQ_CODE,     2},
 
     {"sin",         SIN_CODE,           3},
     {"cos",         COS_CODE,           3},
@@ -53,25 +54,31 @@ Node_t** Tokenize(char** massive_var)
         bool found = false;
         count = i + 1;
 
-        printf("position = %d\n", position);
-        printf("symb = %c\n", massive_code[position]);
-        if (sscanf(&massive_code[position], "%lg%n", &num, &skip) != 0)
-        {
-            massive_tokenov[i] = Make_Node(NUM_CODE, {.num_t = num});
-            position += skip;
-            found = true;
-            continue;
-        }
-
+        // printf("position = %d\n", position);
+        // printf("symb = %c\n", massive_code[position]);
         for (int j = 0; j < NUM_OPER && found == false; j++)
         {
-            if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0) // пока что переменная sinus будет sin и переменная us
+            if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0)
             {
+                if (j > 7 && massive_code[position + massive_op[j].len] != '(') // проверять в парсере
+                    break;
+
                 position += massive_op[j].len;
                 massive_tokenov[i] = Make_Node(OPER_CODE, {.op_code_t = massive_op[j].op_code});
+                printf("Created node oper: val = %d\n", massive_op[j].op_code);
                 found = true;
                 break;
             }
+        }
+        
+        if (found == false && sscanf(&massive_code[position], "%lg%n", &num, &skip) != 0)
+        {
+            // printf("symb = %c\n", massive_code[position]);
+            massive_tokenov[i] = Make_Node(NUM_CODE, {.num_t = num});
+            printf("Created node num: val = %lg\n", num);
+            position += skip;
+            found = true;
+            continue;
         }
 
         if (found == false && sscanf(&massive_code[position], "%[A-Za-z0-9_]%n", var, &skip) != 0)
@@ -83,6 +90,7 @@ Node_t** Tokenize(char** massive_var)
                 if (strncmp(var, massive_var[j], (size_t)skip) == 0)
                 {
                     massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
+                    printf("Created node var: val = %d\n", j);
                     found = true;
                     break;
                 }
@@ -92,6 +100,7 @@ Node_t** Tokenize(char** massive_var)
             {
                 massive_var[num_var] = strdup(var);
                 massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = num_var});
+                printf("Created node var: val = %d\n", num_var);
                 num_var++;
                 found = true;
             }
@@ -103,6 +112,10 @@ Node_t** Tokenize(char** massive_var)
         }
     }
 
+
     massive_tokenov[count] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
+
+    free(massive_code);
+
     return massive_tokenov;
 }

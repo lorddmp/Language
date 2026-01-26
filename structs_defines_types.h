@@ -3,7 +3,7 @@
 
 #define READ_TREE_FILE "Math_problem.txt"
 #define DUMP_TREE_FILE "Dump_tree.txt"
-#define NUM_OPER 16 
+#define NUM_OPER 17 
 
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
@@ -34,6 +34,7 @@ enum oper_codes{
     MUL_CODE = 3,
     DIV_CODE = 4,
     STEPEN_CODE = 5,
+
     SIN_CODE = 6,
     COS_CODE = 7,
     TAN_CODE = 8,
@@ -44,7 +45,9 @@ enum oper_codes{
     ARCCOTAN_CODE = 13,
     LN_CODE = 14,
     OPEN_BRAC_CODE = 15,
-    CLOSED_BRAC_CODE = 16
+    CLOSED_BRAC_CODE = 16,
+
+    DOUBLE_EQ_CODE = 17,
 };
 
 struct oper_t{
