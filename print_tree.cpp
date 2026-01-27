@@ -11,6 +11,10 @@ void Print_Node(Node_t* node, FILE* fp)
         fprintf(fp, "node%p [shape = record, color = blue, label=\"{type: operation | value: %d|{<f0> %p| <f1> %p}}\"];\n", node, node->value.op_code_t, node->left, node->right);
     else if (node->type == VAR_CODE)
         fprintf(fp, "node%p [shape = record, color = green, label=\"{type: variable | value: %d|{<f0> %p| <f1> %p}}\"];\n", node, node->value.var_ind, node->left, node->right);
+    else if (node->type == BODY_CODE)
+        fprintf(fp, "node%p [shape = record, color = yellow, label=\"{type: body | value: %d|{<f0> %p| <f1> %p}}\"];\n", node, node->value.var_ind, node->left, node->right);
+    else if (node->type == TREE_ROOT_CODE)
+        fprintf(fp, "node%p [shape = record, color = black, label=\"{type: tree_root | value: %d|{<f0> %p| <f1> %p}}\"];\n", node, node->value.var_ind, node->left, node->right);
     else
         fprintf(fp, "node%p [shape = record, color = red, label=\"{type: number | value: %lg|{<f0> %p| <f1> %p}}\"];\n", node, node->value.num_t, node->left, node->right);
 

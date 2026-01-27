@@ -24,7 +24,7 @@ double funcname(differentiator_t* tree, Node_t* node, errors* err)              
 
 ARITHMETIC_FUNC(ADD_CASE, +)
 ARITHMETIC_FUNC(SUB_CASE, -)
-ARITHMETIC_FUNC(MUL_CASE, *)
+ARITHMETIC_FUNC(MUL_CASE, *) 
 
 #undef ARITHMETIC_FUNC
 

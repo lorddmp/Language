@@ -5,31 +5,43 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <ctype.h>
+
+void Skip_Spaces(char* massive_code, int* position);
 
 oper_t massive_op[NUM_OPER] = {
-    {"+",           ADD_CODE,           1},
-    {"-",           SUB_CODE,           1},
-    {"*",           MUL_CODE,           1},
-    {"/",           DIV_CODE,           1},
-    {"^",           STEPEN_CODE,        1},
-    {"(",           OPEN_BRAC_CODE,     1},
-    {")",           CLOSED_BRAC_CODE,   1},
-    {"==",          DOUBLE_EQ_CODE,     2},
+    {"+",           ADD_CODE,               1},
+    {"-",           SUB_CODE,               1},
+    {"*",           MUL_CODE,               1},
+    {"/",           DIV_CODE,               1},
+    {"^",           STEPEN_CODE,            1},
+    {"(",           OPEN_BRAC_CODE,         1},
+    {")",           CLOSED_BRAC_CODE,       1},
+    {"{",           OPEN_FIG_BRAC_CODE,     1},
+    {"}",           CLOSE_FIG_BRAC_CODE,    1},
+    {"==",          DOUBLE_EQ_CODE,         2},
+    {"=",           INIT_CODE,              1},
+    {"var",         VAR_INIT_CODE,          3},
+    {";",           SEMICOLONE_CODE,        1},
 
-    {"sin",         SIN_CODE,           3},
-    {"cos",         COS_CODE,           3},
-    {"tan",         TAN_CODE,           3},
-    {"cotan",       COTAN_CODE,         5},
-    {"arcsin",      ARCSIN_CODE,        6},
-    {"arccos",      ARCCOS_CODE,        6},
-    {"arctan",      ARCTAN_CODE,        6},
-    {"arccotan",    ARCCOTAN_CODE,      6},
-    {"ln",          LN_CODE,            2},
+    {"sin",         SIN_CODE,               3},
+    {"cos",         COS_CODE,               3},
+    {"tan",         TAN_CODE,               3},
+    {"cotan",       COTAN_CODE,             5},
+    {"arcsin",      ARCSIN_CODE,            6},
+    {"arccos",      ARCCOS_CODE,            6},
+    {"arctan",      ARCTAN_CODE,            6},
+    {"arccotan",    ARCCOTAN_CODE,          6},
+    {"ln",          LN_CODE,                2},
+
+    {"if",          IF_CODE,                2},
 };
 
 #define ERROR(filename, funcname, line)                                                             \
+{                                                                                                   \
     fprintf(stderr, "Error in file: %s, function: %s, line: %d", filename, funcname, line);         \
     return NULL;                                                                                    \
+}                                                                                                   \
 
 
 Node_t** Tokenize(char** massive_var)
@@ -51,6 +63,7 @@ Node_t** Tokenize(char** massive_var)
 
     for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
+        Skip_Spaces(massive_code, &position);
         bool found = false;
         count = i + 1;
 
@@ -60,7 +73,9 @@ Node_t** Tokenize(char** massive_var)
         {
             if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0)
             {
-                if (j > 7 && massive_code[position + massive_op[j].len] != '(') // проверять в парсере
+                if (j >= NUM_OPER - 10 &&   (isalpha(massive_code[position + massive_op[j].len]) || 
+                                            isdigit(massive_code[position + massive_op[j].len]) ||
+                                            massive_code[position + massive_op[j].len] == '_'))
                     break;
 
                 position += massive_op[j].len;
@@ -100,16 +115,14 @@ Node_t** Tokenize(char** massive_var)
             {
                 massive_var[num_var] = strdup(var);
                 massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = num_var});
-                printf("Created node var: val = %d\n", num_var);
+                printf("Created new node var: val = %d\n", num_var);
                 num_var++;
                 found = true;
             }
         }
         
         if (found == false)
-        {
             ERROR(__FILE__, __func__, __LINE__)
-        }
     }
 
 
@@ -118,4 +131,10 @@ Node_t** Tokenize(char** massive_var)
     free(massive_code);
 
     return massive_tokenov;
+}
+
+void Skip_Spaces(char* massive_code, int* position)
+{
+    while (isspace(massive_code[*position]))
+        (*position)++;
 }

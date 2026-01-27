@@ -9,16 +9,17 @@
 #include <math.h>
 
 // РБНФ
-// End -> Decl* $
+// End -> [Decl ';']* <endcode>
 // Decl -> Init | Expr | If
 // Init -> 'var' Var '=' Expr
-// If -> 'if' Paren '{' Decl* '}'
+// If -> 'if' Paren Fig_Paren
 // Expr -> AS ['==' ... Expr]*
 // AS  -> MD ['+'|'-' AS]*
 // MD  -> Pow ['*'|'/' MD]*
-// Pow -> P ['^' Pow]*
-// P -> Paren | N | Func | Var
-// Paren -> '(' AS ')'
+// Pow -> Object ['^' Pow]*
+// Object -> Paren | N | Func | Var
+// Fig_Paren -> '{' [Decl ';']* '}'
+// Paren -> '(' EXPR ')' ////////////////
 // N -> 0-9*
 // Func -> 'sin' Paren
 // Var -> a-zA-Z_
@@ -34,12 +35,18 @@ if (a == NULL)                                              \
     return NULL;                                            \
 
 Node_t* Get_End(int* position, Node_t** mas_tokenov);
+Node_t* Get_Decl(int* position, Node_t** mas_tokenov);
+
+Node_t* Get_Init(int* position, Node_t** mas_tokenov);
 Node_t* Get_Expr(int* position, Node_t** mas_tokenov);
+Node_t* Get_If(int* position, Node_t** mas_tokenov);
+
 Node_t* Get_AS(int* position, Node_t** mas_tokenov);
 Node_t* Get_MD(int* position, Node_t** mas_tokenov);
 Node_t* Get_Pow(int* position, Node_t** mas_tokenov);
 Node_t* Get_Object(int* position, Node_t** mas_tokenov);
 Node_t* Get_Paren(int* position, Node_t** mas_tokenov);
+Node_t* Get_Fig_Paren(int* position, Node_t** mas_tokenov);
 Node_t* Get_N(int* position, Node_t** mas_tokenov);
 Node_t* Get_Func(int* position, Node_t** mas_tokenov);
 Node_t* Get_Var(int* position, Node_t** mas_tokenov);
@@ -57,8 +64,22 @@ tree_t Parsing(Node_t** mas_tokenov)
 Node_t* Get_End(int* position, Node_t** mas_tokenov)
 {
     printf("GetEnd\n");
-    Node_t* val = Get_Expr(position, mas_tokenov);
-    IF_ERROR_READING(val)
+    Node_t* val = Get_Decl(position, mas_tokenov);
+
+    if (val == NULL)
+        ERROR(__FILE__, __func__, __LINE__)
+
+    Node_t* val2 = Make_Node(BODY_CODE, {});
+
+    Node_t* val666 = Make_Node(TREE_ROOT_CODE, {}, val2, val);
+    val2 = val666;
+
+    while (mas_tokenov[*position]->value.op_code_t != END_CODE && (val = Get_Decl(position, mas_tokenov)) != NULL)
+    {
+        val2 = val2->left;
+        val2->left = Make_Node(BODY_CODE, {});
+        val2->right = val;
+    }
     
     if (mas_tokenov[*position]->value.op_code_t != END_CODE)
     {
@@ -69,7 +90,49 @@ Node_t* Get_End(int* position, Node_t** mas_tokenov)
         ERROR(__FILE__, __func__, __LINE__)
     }
     
+    return val666;
+}
+
+Node_t* Get_Decl(int* position, Node_t** mas_tokenov)
+{
+    printf("GetDecl\n");
+
+    Node_t* val = NULL;
+    if ((val = Get_Init(position, mas_tokenov)) == NULL)
+        if ((val = Get_Expr(position, mas_tokenov)) == NULL)
+            if ((val = Get_If(position, mas_tokenov)) == NULL)
+                return NULL;
+
+    if (mas_tokenov[*position]->value.op_code_t != SEMICOLONE_CODE)
+        ERROR(__FILE__, __func__, __LINE__)
+    
+    (*position)++;
     return val;
+}
+
+Node_t* Get_Init(int* position, Node_t** mas_tokenov)
+{
+    printf("Get_Init\n");
+    if (mas_tokenov[*position]->value.op_code_t != VAR_INIT_CODE)
+        return NULL;
+
+    (*position)++;
+    Node_t* val = Get_Var(position, mas_tokenov);
+    IF_ERROR_READING(val)
+
+    if (mas_tokenov[*position]->value.op_code_t == INIT_CODE)
+    {
+        (*position)++;
+        printf("NOW TYPE AFTER INIT %d\n", mas_tokenov[*position]->value.op_code_t);
+        Node_t* val2 = Get_Expr(position, mas_tokenov);
+        if (val2 == NULL)
+            ERROR(__FILE__, __func__, __LINE__)
+
+        val = Make_Node(OPER_CODE, {.op_code_t = INIT_CODE}, val, val2);
+        return val;
+    }
+    else
+        ERROR(__FILE__, __func__, __LINE__)
 }
 
 Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
@@ -78,7 +141,7 @@ Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
     Node_t* val = Get_AS(position, mas_tokenov);
     IF_ERROR_READING(val)
 
-     while (mas_tokenov[*position]->value.op_code_t == DOUBLE_EQ_CODE)
+    while (mas_tokenov[*position]->value.op_code_t == DOUBLE_EQ_CODE)
     {
         (*position)++;
         Node_t* val2 = Get_AS(position, mas_tokenov);
@@ -88,9 +151,25 @@ Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
     return val;
 }
 
+Node_t* Get_If(int* position, Node_t** mas_tokenov)
+{
+    printf("GetIf\n");
+    if (mas_tokenov[*position]->value.op_code_t != IF_CODE)
+        return NULL;
+
+    (*position)++;
+    Node_t* val = Get_Paren(position, mas_tokenov);
+    IF_ERROR_READING(val)
+    Node_t* val2 = Get_Fig_Paren(position, mas_tokenov);
+    IF_ERROR_READING(val2)
+
+    val = Make_Node(OPER_CODE, {.op_code_t = IF_CODE}, val, val2);
+    return val;
+}
+
 Node_t* Get_AS(int* position, Node_t** mas_tokenov)
 {
-    printf("GetAS before\n");
+    printf("GetAS\n");
     Node_t* val = Get_MD(position, mas_tokenov);
     IF_ERROR_READING(val)
     // printf("pos = %d\n", mas_tokenov[*position]->value.op_code_t);
@@ -110,7 +189,7 @@ Node_t* Get_AS(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_MD(int* position, Node_t** mas_tokenov)
 {
-    printf("GetMD before\n");
+    printf("GetMD\n");
     Node_t* val = Get_Pow(position, mas_tokenov);
     IF_ERROR_READING(val)
     while (mas_tokenov[*position]->value.op_code_t == MUL_CODE || mas_tokenov[*position]->value.op_code_t == DIV_CODE)
@@ -129,7 +208,7 @@ Node_t* Get_MD(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Pow(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Pow before\n");
+    printf("Get_Pow\n");
     Node_t* val = Get_Object(position, mas_tokenov);
     IF_ERROR_READING(val)
     while (mas_tokenov[*position]->value.op_code_t == STEPEN_CODE)
@@ -145,37 +224,47 @@ Node_t* Get_Pow(int* position, Node_t** mas_tokenov)
 Node_t* Get_Object(int* position, Node_t** mas_tokenov)
 {
     printf("GetObject\n");
-    
     Node_t* val = NULL;
 
     if ((val = Get_Paren(position, mas_tokenov)) == NULL)
         if ((val = Get_N(position, mas_tokenov)) == NULL)
             if ((val = Get_Func(position, mas_tokenov)) == NULL)
                 if ((val = Get_Var(position, mas_tokenov)) == NULL)
-                {
-                    ERROR(__FILE__, __func__, __LINE__)
                     return NULL;
-                }
 
     return val;
 }
 
 Node_t* Get_Paren(int* position, Node_t** mas_tokenov)
 {
-    if (mas_tokenov[*position]->value.op_code_t == OPEN_BRAC_CODE)
-    {
-        (*position)++;
-        Node_t* val = Get_AS(position, mas_tokenov);
-        IF_ERROR_READING(val)
-        if (mas_tokenov[*position]->value.op_code_t == CLOSED_BRAC_CODE)
-            (*position)++;
-        else
-            ERROR(__FILE__, __func__, __LINE__)
-
-        return val;
-    }
-    else
+    printf("GetParen\n");
+    if (mas_tokenov[*position]->value.op_code_t != OPEN_BRAC_CODE)
         return NULL;
+        
+    (*position)++;
+    Node_t* val = Get_Expr(position, mas_tokenov);
+    IF_ERROR_READING(val)
+    if (mas_tokenov[*position]->value.op_code_t != CLOSED_BRAC_CODE)
+        ERROR(__FILE__, __func__, __LINE__)
+        
+    (*position)++;
+    return val;
+}
+
+Node_t* Get_Fig_Paren(int* position, Node_t** mas_tokenov)
+{
+    printf("Get_Fig_Paren\n");
+    if (mas_tokenov[*position]->value.op_code_t != OPEN_FIG_BRAC_CODE)
+        return NULL;
+        
+    (*position)++;
+    Node_t* val = Get_Decl(position, mas_tokenov);
+    IF_ERROR_READING(val)
+    if (mas_tokenov[*position]->value.op_code_t != CLOSE_FIG_BRAC_CODE)
+        ERROR(__FILE__, __func__, __LINE__)
+        
+    (*position)++;
+    return val;
 }
 
 Node_t* Get_N(int* position, Node_t** mas_tokenov)

@@ -3,7 +3,7 @@
 
 #define READ_TREE_FILE "Math_problem.txt"
 #define DUMP_TREE_FILE "Dump_tree.txt"
-#define NUM_OPER 17 
+#define NUM_OPER 23
 
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
@@ -25,6 +25,8 @@ enum type_codes{
     OPER_CODE = 1,
     VAR_CODE = 2,
     NUM_CODE = 3,
+    BODY_CODE = 4,
+    TREE_ROOT_CODE = 2007,
 };
 
 enum oper_codes{
@@ -46,8 +48,14 @@ enum oper_codes{
     LN_CODE = 14,
     OPEN_BRAC_CODE = 15,
     CLOSED_BRAC_CODE = 16,
+    OPEN_FIG_BRAC_CODE = 17,
+    CLOSE_FIG_BRAC_CODE = 18,
+    SEMICOLONE_CODE = 19,
 
-    DOUBLE_EQ_CODE = 17,
+    DOUBLE_EQ_CODE = 20,
+    IF_CODE = 21,
+    INIT_CODE = 23,
+    VAR_INIT_CODE = 24,
 };
 
 struct oper_t{
