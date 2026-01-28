@@ -9,7 +9,8 @@
 
 int main()
 {
-    char* massive_var[100] = {};
+    FILE* fp = fopen("Saved_tree.txt", "w");
+    char** massive_var = (char**)calloc(100, sizeof(char*));
 
     Node_t** mas_tokens = Tokenize(massive_var);
 
@@ -22,9 +23,11 @@ int main()
         return 1;
 
     Print_Tree(tree.root_node);
+    Save_Tree(tree.root_node, fp);
 
     free(mas_tokens);
     Tree_Destructor(tree.root_node);
 
+    free(massive_var);
     return 0;
 }

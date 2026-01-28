@@ -3,6 +3,45 @@
 
 void Print_Node(Node_t* node, FILE* fp);
 
+void Save_Tree(Node_t* node, FILE* fp)
+{
+    assert(node);
+    fprintf(fp, "( ");
+    fprintf(fp, "%d|", node->type);
+    switch (node->type)
+    {
+        case NUM_CODE: 
+            fprintf(fp, "%lg", node->value.num_t);
+            break;
+        case OPER_CODE: 
+            fprintf(fp, "%d", node->value.op_code_t);
+            break;
+        case VAR_CODE: 
+            fprintf(fp, "%d", node->value.var_ind);
+            break;
+        case BODY_CODE: 
+            fprintf(fp, "0");
+            break;
+        case TREE_ROOT_CODE: 
+            fprintf(fp, "0");
+            break;
+        default:
+            fprintf(stderr, "ERROR IN SAVING FILE!\n");
+    }
+
+    if (node->left != NULL)
+        Save_Tree(node->left, fp);
+    else
+        fprintf(fp, "nil ");
+
+    if (node->right != NULL)
+        Save_Tree(node->right, fp);
+    else
+        fprintf(fp, "nil ");
+
+    fprintf(fp, ") ");
+}
+
 void Print_Node(Node_t* node, FILE* fp)
 {
     assert(node);

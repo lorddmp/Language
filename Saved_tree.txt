@@ -1,0 +1,1 @@
+( 2007|0( 4|0nil ( 1|21( 1|20( 2|0nil nil ) ( 3|66nil nil ) ) ( 4|0( 4|0( 4|0nil ( 1|22( 2|0nil nil ) ( 1|1( 2|0nil nil ) ( 2|1nil nil ) ) ) ) ( 1|23( 2|1nil nil ) ( 3|28nil nil ) ) ) ( 1|22( 2|0nil nil ) ( 1|1( 2|0nil nil ) ( 3|1nil nil ) ) ) ) ) ) ( 1|23( 2|0nil nil ) ( 3|66nil nil ) ) ) 

@@ -6,7 +6,7 @@
 #include <math.h>
 
 #define ARITHMETIC_FUNC(funcname, sign)                                 \
-double funcname(differentiator_t* tree, Node_t* node, errors* err)                \
+double funcname(tree_t* tree, Node_t* node, errors* err)                \
 {                                                                       \
     if (node->left == NULL || node->right == NULL)                      \
     {                                                                   \
@@ -28,7 +28,7 @@ ARITHMETIC_FUNC(MUL_CASE, *)
 
 #undef ARITHMETIC_FUNC
 
-double DIV_CASE(differentiator_t* tree, Node_t* node, errors* err)
+double DIV_CASE(tree_t* tree, Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
@@ -49,7 +49,7 @@ double DIV_CASE(differentiator_t* tree, Node_t* node, errors* err)
     return a/b;
 }
 
-double STEPEN_CASE(differentiator_t* tree, Node_t* node, errors* err)
+double STEPEN_CASE(tree_t* tree, Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
@@ -67,7 +67,7 @@ double STEPEN_CASE(differentiator_t* tree, Node_t* node, errors* err)
 }
 
 #define TRIG_FUNCS(funcname, func)                                      \
-double funcname(differentiator_t* tree, Node_t* node, errors* err)                \
+double funcname(tree_t* tree, Node_t* node, errors* err)                \
 {                                                                       \
     if (node->left == NULL && node->right == NULL)                      \
     {                                                                   \
@@ -90,7 +90,7 @@ double funcname(differentiator_t* tree, Node_t* node, errors* err)              
 TRIG_FUNCS(SIN_CASE, sin)
 TRIG_FUNCS(COS_CASE, cos)
 TRIG_FUNCS(TAN_CASE, tan)
-double COTAN_CASE(differentiator_t* tree, Node_t* node, errors* err)
+double COTAN_CASE(tree_t* tree, Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {
@@ -119,7 +119,7 @@ double COTAN_CASE(differentiator_t* tree, Node_t* node, errors* err)
 TRIG_FUNCS(ARCSIN_CASE, asin)
 TRIG_FUNCS(ARCCOS_CASE, acos)
 TRIG_FUNCS(ARCTAN_CASE, atan)
-double ARCCOTAN_CASE(differentiator_t* tree, Node_t* node, errors* err)
+double ARCCOTAN_CASE(tree_t* tree, Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {
@@ -142,7 +142,7 @@ double ARCCOTAN_CASE(differentiator_t* tree, Node_t* node, errors* err)
 }
 #undef TRIG_FUNCS
 
-double LN_CASE(differentiator_t* tree, Node_t* node, errors* err)
+double LN_CASE(tree_t* tree, Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {

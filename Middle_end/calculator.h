@@ -3,6 +3,6 @@
 
 #include "structs_defines_types.h"
 
-double Calculate(differentiator_t* tree, Node_t* node, errors* err);
+double Calculate(tree_t* tree, Node_t* node, errors* err);
 
 #endif

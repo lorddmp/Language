@@ -20,8 +20,9 @@ oper_t massive_op[NUM_OPER] = {
     {"{",           OPEN_FIG_BRAC_CODE,     1},
     {"}",           CLOSE_FIG_BRAC_CODE,    1},
     {"==",          DOUBLE_EQ_CODE,         2},
-    {"=",           INIT_CODE,              1},
+    {"=",           EQUA_CODE,              1},
     {"var",         VAR_INIT_CODE,          3},
+    {"now",         CHANGE_VAR_CODE,        3},
     {";",           SEMICOLONE_CODE,        1},
 
     {"sin",         SIN_CODE,               3},

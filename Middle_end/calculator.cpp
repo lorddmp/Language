@@ -6,7 +6,7 @@
 #include <math.h>
 
 struct functions{
-    double(*funcname)(differentiator_t* tree, Node_t* node, errors* err);
+    double(*funcname)(tree_t* tree, Node_t* node, errors* err);
     enum oper_codes func_code;
 };
 
@@ -16,7 +16,7 @@ functions mas_functions[NUM_OPER] = {
     {MUL_CASE, MUL_CODE},
     {DIV_CASE, DIV_CODE},
     {STEPEN_CASE, STEPEN_CODE},
-    {SIN_CASE, SIN_CODE},
+    {SIN_CASE, SIN_CODE}, 
     {COS_CASE, COS_CODE},
     {TAN_CASE, TAN_CODE},
     {COTAN_CASE, COTAN_CODE},
@@ -28,7 +28,7 @@ functions mas_functions[NUM_OPER] = {
 
 };
 
-double Calculate(differentiator_t* tree, Node_t* node, errors* err)
+double Calculate(tree_t* tree, Node_t* node, errors* err)
 {
     if (node == NULL)
         return 0;
