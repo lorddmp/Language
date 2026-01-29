@@ -3,6 +3,7 @@
 
 #include "tokenise.h"
 #include "parsing.h"
+#include "semantika.h"
 #include "print_tree.h"
 #include "tech_func.h"
 #include "structs_defines_types.h"
@@ -22,6 +23,9 @@ int main()
     tree_t tree = Parsing(mas_tokens);
 
     if (tree.root_node == NULL)
+        return 1;
+
+    if (Sem_analysis(tree) == false)
         return 1;
 
     Print_Tree(tree.root_node);
