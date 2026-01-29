@@ -2,7 +2,6 @@
 #define STRUCTS
 
 #define READ_TREE_FILE "Math_problem.txt"
-#define DUMP_TREE_FILE "Dump_tree.txt"
 #define NUM_OPER 24
 
 #define IF_ERROR(arg)                                                                                   \

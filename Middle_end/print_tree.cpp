@@ -72,7 +72,7 @@ void Print_Node(Node_t* node, FILE* fp)
 void Print_Tree(Node_t* node)
 {
     assert(node);
-    FILE* fp = fopen("Dump_tree_front.txt", "w");
+    FILE* fp = fopen("Dump_tree_middle.txt", "w");
 
     if (fp == NULL)
         fprintf(stderr, "ERROR IN OPENING DUMP FILE\n");
