@@ -8,7 +8,7 @@
 #include "tech_func.h"
 #include "structs_defines_types.h"
 
-#define SAVEFILE_NAME_FRONT "Saved_tree_front.txt"
+#define SAVEFILE_NAME_FRONT "Front_end/Saved_tree_front.txt"
 
 int main()
 {

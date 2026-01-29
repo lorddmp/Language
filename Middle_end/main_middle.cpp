@@ -6,7 +6,7 @@
 
 #include <stdio.h>
 
-#define SAVEFILE_NAME_MIDDLE "Saved_tree_middle.txt"
+#define SAVEFILE_NAME_MIDDLE "Middle_end/Saved_tree_middle.txt"
 
 int main()
 {

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SAVEFILE_NAME_FRONT "Saved_tree_front.txt"
+#define SAVEFILE_NAME_FRONT "Front_end/Saved_tree_front.txt"
 
 Node_t* Read_Node(int* position, char* massive);
 
