@@ -36,6 +36,7 @@ oper_t massive_op[NUM_OPER] = {
     {"ln",          LN_CODE,                2},
 
     {"if",          IF_CODE,                2},
+    {"while",       WHILE_CODE,             5},
 };
 
 #define ERROR(filename, funcname, line)                                                             \
@@ -65,6 +66,9 @@ Node_t** Tokenize(char** massive_var)
     for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
         Skip_Spaces(massive_code, &position);
+        if (massive_code[position] == '\0')
+            break;
+
         bool found = false;
         count = i + 1;
 

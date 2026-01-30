@@ -39,7 +39,7 @@ StackErr_t Run_Commands(str_processor* processor);
 
 bool Is_Zero(data_t a, data_t b);
 
-struct functions
+struct functions 
 {
     StackErr_t(*funcname)(str_processor* processor);
     const char* CMD;
@@ -139,10 +139,7 @@ StackErr_t Run_Commands(str_processor* processor)
             continue;
 
         if (processor->buffer_commands[processor->ip] == HLT_CODE)
-        {
-            printf("HLT_RUN\n");
             return NO_ERRORS;
-        }
         else
         {
             StackDump(processor->stk);
@@ -272,7 +269,7 @@ StackErr_t funcname(str_processor* processor)                                   
 GEN_JUMPING(JA_CASE, >)  
 GEN_JUMPING(JAE_CASE, >=)   
 GEN_JUMPING(JB_CASE, <) 
-GEN_JUMPING(JBE_CASE, <=) 
+GEN_JUMPING(JBE_CASE, <=)
  
 #undef GEN_JUMPING
 

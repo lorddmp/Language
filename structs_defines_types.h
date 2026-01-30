@@ -2,7 +2,7 @@
 #define STRUCTS
 
 #define READ_TREE_FILE "Math_problem.txt"
-#define NUM_OPER 24
+#define NUM_OPER 25
 
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
@@ -55,6 +55,8 @@ enum oper_codes{
     IF_CODE = 21,
     EQUA_CODE = 22,
     VAR_INIT_CODE = 23,
+    CHANGE_VAR_CODE = 24,
+    WHILE_CODE = 25,
 };
 
 struct oper_t{

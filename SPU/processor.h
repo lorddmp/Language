@@ -5,7 +5,7 @@
 #include "create_bytecode.h"
 
 #define MAX_SIZE_COMMAND 8
-#define REG_NUM 10
+#define REG_NUM 100
 #define OPER_MEMORY_SIZE 184*250
 #define DLINA_STROKI_OPER 250
 

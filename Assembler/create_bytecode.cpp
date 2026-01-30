@@ -156,7 +156,6 @@ int Find_command_code(char* command, int* j)
 {
     for (int t = 0; t < NUM_COMMAND; t++)
     {
-        
         if (!(strncmp(command, massive_structur[t].CMD, size_t(massive_structur[t].LEN_CMD + 1))))
         {
             *j += massive_structur[t].LEN_CMD;
@@ -195,7 +194,7 @@ StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_com
 
     Skip_Spaces(massive_command, j);
 
-    if(sscanf(massive_command + *j, "[%cX]%n", &reg, &n) == 0 || *(massive_command + *j + 1) != 'X')
+    if (sscanf(massive_command + *j, "%cX%n", &reg, &n) == 0)
         return ILLEGAL_REGISTER; 
 
     if (reg >= REG_NUM)
@@ -250,7 +249,7 @@ StackErr_t Work_Oper_Memory(unsigned char* massive_bytecode, char* massive_comma
 
     Skip_Spaces(massive_command, j);
 
-    if(sscanf(massive_command + *j, "[%cX%n]", &reg, &n) == 0)
+    if(sscanf(massive_command + *j, "[%cX]%n", &reg, &n) == 0)
     {
         printf("Code error: %d. Error in pushing value\n", ILLEGAL_REGISTER);
         return ILLEGAL_REGISTER; 
@@ -274,7 +273,7 @@ StackErr_t Work_Oper_Memory(unsigned char* massive_bytecode, char* massive_comma
     massive_bytecode[*i] = number_of_register;
 
     *num_elements = *i + 1;
-    *j += n + 1;
+    *j += n;
     
     return NO_ERRORS;
 }

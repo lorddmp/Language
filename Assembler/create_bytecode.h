@@ -2,7 +2,7 @@
 #define BYTECODE
 
 #define NAME_INPUT_FILE "Back_end/Commands.txt"
-#define NAME_BYTECODE_FILE "bytecode_file"
+#define NAME_BYTECODE_FILE "Assembler/bytecode_file"
 
 #include "stack.h"
 #include "processor.h"
@@ -11,7 +11,7 @@
 #define MAX_LEN_COMMAND 8
 #define NUM_COMMAND 24
 #define SIZE_MASSIVE 1024
-#define METKA_NUM 10
+#define METKA_NUM 1000
 
 #define IF_ERROR_COMPILER(arg)        \
     if (arg)                          \

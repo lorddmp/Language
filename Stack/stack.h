@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-#define NAME_ERROR_FILE "errors_report.txt"
+#define NAME_ERROR_FILE "SPU/errors_report.txt"
 
 #define ZASHITA
 
