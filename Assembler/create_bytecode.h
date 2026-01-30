@@ -1,7 +1,7 @@
 #ifndef BYTECODE
 #define BYTECODE
 
-#define NAME_INPUT_FILE "picMIPT.txt"
+#define NAME_INPUT_FILE "Back_end/Commands.txt"
 #define NAME_BYTECODE_FILE "bytecode_file"
 
 #include "stack.h"

@@ -195,12 +195,10 @@ StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_com
 
     Skip_Spaces(massive_command, j);
 
-    if(sscanf(massive_command + *j, "%cX%n", &reg, &n) == 0 || *(massive_command + *j + 1) != 'X')
+    if(sscanf(massive_command + *j, "[%cX]%n", &reg, &n) == 0 || *(massive_command + *j + 1) != 'X')
         return ILLEGAL_REGISTER; 
 
-    unsigned char number_of_register = reg - 'A';
-
-    if (number_of_register >= REG_NUM)
+    if (reg >= REG_NUM)
     {
         printf("Code error: %d. Invalid register FROM POPR\n", ILLEGAL_COMMAND);
         return ILLEGAL_COMMAND;
@@ -213,7 +211,7 @@ StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_com
         massive_bytecode[*i] = POPR_CODE;
 
     (*i)++;
-    massive_bytecode[*i] = number_of_register;
+    massive_bytecode[*i] = reg;
 
     *num_elements = *i + 1;
     *j += n;

@@ -1,6 +1,7 @@
 #include "calculator.h"
 #include "reading_tree.h"
 #include "print_tree.h"
+#include "tech_func.h"
 
 #include "structs_defines_types.h"
 
@@ -27,6 +28,8 @@ int main()
 
     Save_Tree(tree.root_node, fp);
     Print_Tree(tree.root_node);
+
+    Tree_Destructor(tree.root_node);
 
     fclose(fp);
     return 0;

@@ -55,7 +55,6 @@ enum oper_codes{
     IF_CODE = 21,
     EQUA_CODE = 22,
     VAR_INIT_CODE = 23,
-    CHANGE_VAR_CODE = 24,
 };
 
 struct oper_t{
