@@ -64,6 +64,7 @@ enum StackErr_t {
     ILLEGAL_REGISTER = 16,
     ILLEGAL_JUMP_ADDRESS = 17,
     ILLEGAL_METKA = 18,
+    ERROR_FINAL = 19,
 };
 
 #include "processor.h"

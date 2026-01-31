@@ -11,11 +11,12 @@
 // РБНФ
 // End -> {tree_root} Tree <endcode>
 // Tree -> [Decl ';']*
-// Decl -> Init | Equat | Expr | If_While
+// Decl -> Init | Equat | Expr | If_While | Printf
 // Init -> 'var' Var '=' Expr
 // Equat -> 'now' Var '=' Expr
 // Expr -> AS ['==' ... Expr]*
 // If_While -> ['if'|'while'] Paren Fig_Paren
+// Printf -> 'printf Paren
 // AS  -> MD ['+'|'-' AS]*
 // MD  -> Pow ['*'|'/' MD]*
 // Pow -> Object ['^' Pow]*
@@ -44,6 +45,7 @@ Node_t* Get_Init(int* position, Node_t** mas_tokenov);
 Node_t* Get_Equat(int* position, Node_t** mas_tokenov);
 Node_t* Get_Expr(int* position, Node_t** mas_tokenov);
 Node_t* Get_If_While(int* position, Node_t** mas_tokenov);
+Node_t* Get_Printf(int* position, Node_t** mas_tokenov);
 
 Node_t* Get_AS(int* position, Node_t** mas_tokenov);
 Node_t* Get_MD(int* position, Node_t** mas_tokenov);
@@ -115,7 +117,8 @@ Node_t* Get_Decl(int* position, Node_t** mas_tokenov)
         if ((val = Get_Equat(position, mas_tokenov)) == NULL)
             if ((val = Get_Expr(position, mas_tokenov)) == NULL)
                 if ((val = Get_If_While(position, mas_tokenov)) == NULL)
-                    return NULL;
+                    if ((val = Get_Printf(position, mas_tokenov)) == NULL)
+                        return NULL;
 
     if (mas_tokenov[*position]->value.op_code_t != SEMICOLONE_CODE)
         ERROR(__FILE__, __func__, __LINE__)
@@ -190,7 +193,7 @@ Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_If_While(int* position, Node_t** mas_tokenov)
 {
-    printf("GetIf\n");
+    printf("GetIf_While\n");
     if (mas_tokenov[*position]->value.op_code_t != IF_CODE && mas_tokenov[*position]->value.op_code_t != WHILE_CODE)
         return NULL;
 
@@ -203,6 +206,20 @@ Node_t* Get_If_While(int* position, Node_t** mas_tokenov)
     IF_ERROR_READING(val2)
 
     val = Make_Node(OPER_CODE, {.op_code_t = op}, val, val2);
+    return val;
+}
+
+Node_t* Get_Printf(int* position, Node_t** mas_tokenov)
+{
+    printf("GetPrintf\n");
+    if (mas_tokenov[*position]->value.op_code_t != PRINTF_CODE)
+        return NULL;
+
+    (*position)++;
+    Node_t* val = Get_Paren(position, mas_tokenov);
+    IF_ERROR_READING(val)
+
+    val = Make_Node(OPER_CODE, {.op_code_t = PRINTF_CODE}, val, NULL);
     return val;
 }
 

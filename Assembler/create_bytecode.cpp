@@ -1,15 +1,36 @@
 #include "create_bytecode.h"
 
 #include <stdio.h>
+#include<stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
+
+struct table_names {
+    char* name;
+    int len;
+    int byte;
+};
+
+StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_command, table_names* massive_metok, int* num_elements, int num_prohod,struct stat buf, FILE* fpp);
+
+int Find_command_code(char* command, int* j);
+
+StackErr_t Work_With_PushValue(unsigned char* massive_bytecode, char* massive_command, int* num_elements, int* i, int* j);
+
+StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_command, int* num_elements, int code, int* i, int* j);
+
+StackErr_t Work_With_Jump(unsigned char* massive_bytecode, char* massive_command, table_names* massive_metok, int* num_elements, int* i, int* j);
+
+StackErr_t Work_Oper_Memory(unsigned char* massive_bytecode, char* massive_command, int* num_elements, int code, int* i, int* j);
+
+bool Skip_Spaces(char* massive_command, int* j);
 
 StackErr_t Create_Bytecode(void)
 {
     struct stat buf = {};
     unsigned char massive_bytecode[SIZE_MASSIVE] = {0};
-    int massive_metok[METKA_NUM] = {};
+    table_names* massive_metok = (table_names*)calloc(METKA_NUM, sizeof(table_names));
     int num_elements = 0, num_prohod = 1;
     
     FILE* fp = fopen(NAME_INPUT_FILE, "r");
@@ -36,30 +57,32 @@ StackErr_t Create_Bytecode(void)
     fclose(fp);
 
     if (String_Processing(massive_bytecode, massive_command, massive_metok, &num_elements, num_prohod, buf, fpp))
-        return NO_ERRORS;
+        return ERROR_FINAL;
 
     num_prohod = 2;
 
     if (String_Processing(massive_bytecode, massive_command, massive_metok, &num_elements, num_prohod, buf, fpp))
-        return NO_ERRORS;
+        return ERROR_FINAL;
 
     fwrite(massive_bytecode, sizeof(unsigned char), (size_t)num_elements, fpp);
 
+    free(massive_metok);
     free(massive_command);
     fclose(fpp);
 
     return NO_ERRORS;
 }
 
-StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_command, int* massive_metok, int* num_elements, int num_prohod, struct stat buf,  FILE* fpp)
+StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_command, table_names* massive_metok, int* num_elements, int num_prohod, struct stat buf,  FILE* fpp)
 {
     char command[MAX_LEN_COMMAND] = {0};
     int cmd = 0, n = 0, adr_metka = 0;
     StackErr_t err = NO_ERRORS;
 
-    for (int i = 0, j = 0, t = 0; j < buf.st_size; i++, t++)
+    for (int i = 0, j = 0; j < buf.st_size; i++)
     {
         Skip_Spaces(massive_command, &j);
+        char* metka_name = (char*)calloc(100, sizeof(char));
 
         cmd = sscanf(massive_command + j, "%s", command);
 
@@ -69,15 +92,26 @@ StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_comm
         Skip_Spaces(massive_command, &j);
         *num_elements = i + 1;
 
-        if (sscanf(command, ":%d%n", &adr_metka, &n) != 0)
+        if (sscanf(command, ":%s%n", metka_name, &n) != 0)
         {
-            if (adr_metka >= METKA_NUM)
+            for (int t = 0; t < METKA_NUM; t++)
             {
-                printf("Code error: %d. Invalid metka\n", ILLEGAL_METKA);
-                return ILLEGAL_METKA;
+                if (massive_metok[t].len == 0)
+                {
+                    adr_metka = t;
+                    break;
+                }
+
+                if (t == METKA_NUM)
+                {
+                    printf("Code error: %d. You can't create more variables than %d\n", ILLEGAL_METKA, METKA_NUM);
+                    return ILLEGAL_METKA;
+                }
             }
 
-            massive_metok[adr_metka] = i;
+            massive_metok[adr_metka].byte = i;
+            massive_metok[adr_metka].name = metka_name;
+            massive_metok[adr_metka].len = n - 1;
             j += n;
             i--;
             continue;
@@ -144,9 +178,7 @@ StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_comm
         }
 
         else if (cmd_code >= JB_CODE && cmd_code <= CALL_CODE)
-        {
             IF_ERROR_COMPILER(Work_With_Jump(massive_bytecode, massive_command, massive_metok, num_elements, &i, &j))
-        }
     }
 
     return NO_ERRORS;
@@ -194,7 +226,7 @@ StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_com
 
     Skip_Spaces(massive_command, j);
 
-    if (sscanf(massive_command + *j, "%cX%n", &reg, &n) == 0)
+    if (sscanf(massive_command + *j, "REG%cX%n", &reg, &n) == 0)
         return ILLEGAL_REGISTER; 
 
     if (reg >= REG_NUM)
@@ -218,23 +250,34 @@ StackErr_t Work_With_Register(unsigned char* massive_bytecode, char* massive_com
     return NO_ERRORS;
 }
 
-StackErr_t Work_With_Jump(unsigned char* massive_bytecode, char* massive_command, int* massive_metok, int* num_elements, int* i, int* j)
+StackErr_t Work_With_Jump(unsigned char* massive_bytecode, char* massive_command, table_names* massive_metok, int* num_elements, int* i, int* j)
 {
     int n = 0;
-    int jump_adr = 0;
-
-    for (int q = 0; q < 10; q++)
+    char jump_adr_name[100] = {};
 
     Skip_Spaces(massive_command, j);
 
-    if(sscanf(massive_command + *j, ":%d%n", &jump_adr, &n) == 0)
+    if(sscanf(massive_command + *j, ":%s%n", jump_adr_name, &n) == 0)
     {
         printf("Code error: %d. Error in reading address jump\n", ILLEGAL_JUMP_ADDRESS);
         return ILLEGAL_JUMP_ADDRESS; 
     } 
 
-    *((int*)(massive_bytecode + *i + 1)) = massive_metok[jump_adr];
-    
+    for (int t = 0; t < METKA_NUM; t++)
+    {
+        if (t == METKA_NUM - 1 || massive_metok[t].len == 0)
+        {
+            *((int*)(massive_bytecode + *i + 1)) = 0;
+            break;
+        }
+
+        if (strcmp(jump_adr_name, massive_metok[t].name) == 0)
+        {
+            *((int*)(massive_bytecode + *i + 1)) = massive_metok[t].byte;
+            break;
+        }
+    }
+
     *i += (int)sizeof(int);
     *num_elements = *i + 1;
     *j += n;
@@ -250,10 +293,7 @@ StackErr_t Work_Oper_Memory(unsigned char* massive_bytecode, char* massive_comma
     Skip_Spaces(massive_command, j);
 
     if(sscanf(massive_command + *j, "[%cX]%n", &reg, &n) == 0)
-    {
-        printf("Code error: %d. Error in pushing value\n", ILLEGAL_REGISTER);
         return ILLEGAL_REGISTER; 
-    } 
 
     unsigned char number_of_register = reg - 'A';
 

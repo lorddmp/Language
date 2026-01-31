@@ -35,7 +35,7 @@ int Obrabotka_node(Node_t* node, FILE* fp)
     if (node->value.op_code_t == VAR_INIT_CODE || node->value.op_code_t == EQUA_CODE)
     {
         Obrabotka_node(node->right, fp);
-        fprintf(fp, "POPR %dX\n", node->left->value.var_ind);
+        fprintf(fp, "POP REG%dX\n", node->left->value.var_ind);
         return 0;
     }
 
@@ -43,20 +43,29 @@ int Obrabotka_node(Node_t* node, FILE* fp)
     {
         Obrabotka_node(node->left, fp);
         fprintf(fp, "PUSH 0\n");
-        fprintf(fp, "JE :%d\n", node);
+        fprintf(fp, "JE :%p\n", node);
         Obrabotka_node(node->right, fp);
-        fprintf(fp, ":%d\n", node);
+        fprintf(fp, ":%p\n", node);
+        return 0;
     }
 
     if (node->value.op_code_t == WHILE_CODE)
     {
-        fprintf(fp, ":%d\n", (int)node->left);
+        fprintf(fp, ":%p\n", node->left);
         Obrabotka_node(node->left, fp);
         fprintf(fp, "PUSH 0\n");
-        fprintf(fp, "JE :%d\n", (int)node);
+        fprintf(fp, "JE :%p\n", node);
         Obrabotka_node(node->right, fp);
-        fprintf(fp, "JMP :%d", (int)node->left);
-        fprintf(fp, ":%d\n", (int)node);
+        fprintf(fp, "JMP :%p\n", node->left);
+        fprintf(fp, ":%p\n", node);
+        return 0;
+    }
+
+    if (node->value.op_code_t == PRINTF_CODE)
+    {
+        Obrabotka_node(node->left, fp);
+        fprintf(fp, "POP\n");
+        return 0;
     }
 
     if (node->left != NULL)
@@ -72,7 +81,7 @@ int Obrabotka_node(Node_t* node, FILE* fp)
 
     if (node->type == VAR_CODE)
     {
-        fprintf(fp, "PUSH %dX\n", node->value.var_ind);
+        fprintf(fp, "PUSH REG%dX\n", node->value.var_ind);
         return 0;
     }
 

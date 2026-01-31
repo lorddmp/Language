@@ -37,6 +37,7 @@ oper_t massive_op[NUM_OPER] = {
 
     {"if",          IF_CODE,                2},
     {"while",       WHILE_CODE,             5},
+    {"printf",      PRINTF_CODE,            6},
 };
 
 #define ERROR(filename, funcname, line)                                                             \

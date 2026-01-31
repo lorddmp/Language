@@ -6,6 +6,9 @@
 
 int main()
 {
-    Create_Bytecode();
+    if( Create_Bytecode() != NO_ERRORS)
+        return 1;
+
+    printf("\033[32mCOMPILATION ENDED SUCCESSFULLY\n");
     return 0;
 }
