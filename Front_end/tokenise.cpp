@@ -21,8 +21,8 @@ oper_t massive_op[NUM_OPER] = {
     {"}",           CLOSE_FIG_BRAC_CODE,    1},
     {"==",          DOUBLE_EQ_CODE,         2},
     {"=",           EQUA_CODE,              1},
-    {"var",         VAR_INIT_CODE,          3},
-    {"now",         CHANGE_VAR_CODE,        3},
+    {"переменночка",VAR_INIT_CODE,          24},
+    {"тепереча",    CHANGE_VAR_CODE,        16},
     {";",           SEMICOLONE_CODE,        1},
 
     {"sin",         SIN_CODE,               3},
@@ -35,9 +35,9 @@ oper_t massive_op[NUM_OPER] = {
     {"arccotan",    ARCCOTAN_CODE,          6},
     {"ln",          LN_CODE,                2},
 
-    {"if",          IF_CODE,                2},
-    {"while",       WHILE_CODE,             5},
-    {"printf",      PRINTF_CODE,            6},
+    {"ежели",       IF_CODE,                10},
+    {"покудова",    WHILE_CODE,             16},
+    {"напечатай",   PRINTF_CODE,            18},
 };
 
 #define ERROR(filename, funcname, line)                                                             \
@@ -67,6 +67,7 @@ Node_t** Tokenize(char** massive_var)
     for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
         Skip_Spaces(massive_code, &position);
+        printf("%s", &massive_code[position]);
         if (massive_code[position] == '\0')
             break;
 
