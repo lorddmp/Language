@@ -14,7 +14,7 @@ oper_t massive_op[NUM_OPER] = {
     {"-",           SUB_CODE,               1},
     {"*",           MUL_CODE,               1},
     {"/",           DIV_CODE,               1},
-    {"^",           STEPEN_CODE,            1},
+    {"^",           POW_CODE,            1},
     {"(",           OPEN_BRAC_CODE,         1},
     {")",           CLOSED_BRAC_CODE,       1},
     {"{",           OPEN_FIG_BRAC_CODE,     1},
@@ -67,7 +67,7 @@ Node_t** Tokenize(char** massive_var)
     for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
     {
         Skip_Spaces(massive_code, &position);
-        printf("%s", &massive_code[position]);
+        // printf("%s", &massive_code[position]);
         if (massive_code[position] == '\0')
             break;
 
@@ -87,7 +87,7 @@ Node_t** Tokenize(char** massive_var)
 
                 position += massive_op[j].len;
                 massive_tokenov[i] = Make_Node(OPER_CODE, {.op_code_t = massive_op[j].op_code});
-                printf("Created node oper: val = %d\n", massive_op[j].op_code);
+                // printf("Created node oper: val = %d\n", massive_op[j].op_code);
                 found = true;
                 break;
             }
@@ -97,7 +97,7 @@ Node_t** Tokenize(char** massive_var)
         {
             // printf("symb = %c\n", massive_code[position]);
             massive_tokenov[i] = Make_Node(NUM_CODE, {.num_t = num});
-            printf("Created node num: val = %lg\n", num);
+            // printf("Created node num: val = %lg\n", num);
             position += skip;
             found = true;
             continue;
@@ -112,7 +112,7 @@ Node_t** Tokenize(char** massive_var)
                 if (strncmp(var, massive_var[j], (size_t)skip) == 0)
                 {
                     massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
-                    printf("Created node var: val = %d\n", j);
+                    // printf("Created node var: val = %d\n", j);
                     found = true;
                     break;
                 }
@@ -122,7 +122,7 @@ Node_t** Tokenize(char** massive_var)
             {
                 massive_var[num_var] = strdup(var);
                 massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = num_var});
-                printf("Created new node var: val = %d\n", num_var);
+                // printf("Created new node var: val = %d\n", num_var);
                 num_var++;
                 found = true;
             }

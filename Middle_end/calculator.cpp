@@ -17,7 +17,7 @@ functions mas_functions[NUM_MATH_OPER] = {
     {SUB_CASE, SUB_CODE},
     {MUL_CASE, MUL_CODE},
     {DIV_CASE, DIV_CODE},
-    {STEPEN_CASE, STEPEN_CODE},
+    {STEPEN_CASE, POW_CODE},
     {SIN_CASE, SIN_CODE}, 
     {COS_CASE, COS_CODE},
     {TAN_CASE, TAN_CODE},

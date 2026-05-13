@@ -69,7 +69,7 @@ tree_t Parsing(Node_t** mas_tokenov)
 
 Node_t* Get_End(int* position, Node_t** mas_tokenov)
 {
-    printf("GetEnd\n");
+    // printf("GetEnd\n");
     Node_t* val = Get_Decl(position, mas_tokenov);
 
     if (val == NULL)
@@ -92,7 +92,7 @@ Node_t* Get_End(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Tree(int* position, Node_t** mas_tokenov)
 {
-    printf("GetTree\n");
+    // printf("GetTree\n");
     Node_t* val = Get_Decl(position, mas_tokenov);
     IF_ERROR_READING(val)
 
@@ -110,7 +110,7 @@ Node_t* Get_Tree(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Decl(int* position, Node_t** mas_tokenov)
 {
-    printf("GetDecl\n");
+    // printf("GetDecl\n");
 
     Node_t* val = NULL;
     if ((val = Get_Init(position, mas_tokenov)) == NULL)
@@ -129,7 +129,7 @@ Node_t* Get_Decl(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Init(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Init\n");
+    // printf("Get_Init\n");
     if (mas_tokenov[*position]->value.op_code_t != VAR_INIT_CODE)
         return NULL;
 
@@ -153,7 +153,7 @@ Node_t* Get_Init(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Equat(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Equat\n");
+    // printf("Get_Equat\n");
     if (mas_tokenov[*position]->value.op_code_t != CHANGE_VAR_CODE)
         return NULL;
 
@@ -177,7 +177,7 @@ Node_t* Get_Equat(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
 {
-    printf("GetExpr\n");
+    // printf("GetExpr\n");
     Node_t* val = Get_AS(position, mas_tokenov);
     IF_ERROR_READING(val)
 
@@ -193,7 +193,7 @@ Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_If_While(int* position, Node_t** mas_tokenov)
 {
-    printf("GetIf_While\n");
+    // printf("GetIf_While\n");
     if (mas_tokenov[*position]->value.op_code_t != IF_CODE && mas_tokenov[*position]->value.op_code_t != WHILE_CODE)
         return NULL;
 
@@ -211,7 +211,7 @@ Node_t* Get_If_While(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Printf(int* position, Node_t** mas_tokenov)
 {
-    printf("GetPrintf\n");
+    // printf("GetPrintf\n");
     if (mas_tokenov[*position]->value.op_code_t != PRINTF_CODE)
         return NULL;
 
@@ -225,7 +225,7 @@ Node_t* Get_Printf(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_AS(int* position, Node_t** mas_tokenov)
 {
-    printf("GetAS\n");
+    // printf("GetAS\n");
     Node_t* val = Get_MD(position, mas_tokenov);
     IF_ERROR_READING(val)
     // printf("pos = %d\n", mas_tokenov[*position]->value.op_code_t);
@@ -245,7 +245,7 @@ Node_t* Get_AS(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_MD(int* position, Node_t** mas_tokenov)
 {
-    printf("GetMD\n");
+    // printf("GetMD\n");
     Node_t* val = Get_Pow(position, mas_tokenov);
     IF_ERROR_READING(val)
     while (mas_tokenov[*position]->value.op_code_t == MUL_CODE || mas_tokenov[*position]->value.op_code_t == DIV_CODE)
@@ -264,22 +264,22 @@ Node_t* Get_MD(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Pow(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Pow\n");
+    // printf("Get_Pow\n");
     Node_t* val = Get_Object(position, mas_tokenov);
     IF_ERROR_READING(val)
-    while (mas_tokenov[*position]->value.op_code_t == STEPEN_CODE)
+    while (mas_tokenov[*position]->value.op_code_t == POW_CODE)
     {
         (*position)++;
         Node_t* val2 = Get_Pow(position, mas_tokenov);
         IF_ERROR_READING(val2)
-        val = Make_Node(OPER_CODE, {.op_code_t = STEPEN_CODE}, val, val2);
+        val = Make_Node(OPER_CODE, {.op_code_t = POW_CODE}, val, val2);
     }
     return val;
 }
 
 Node_t* Get_Object(int* position, Node_t** mas_tokenov)
 {
-    printf("GetObject\n");
+    // printf("GetObject\n");
     Node_t* val = NULL;
 
     if ((val = Get_Paren(position, mas_tokenov)) == NULL)
@@ -293,7 +293,7 @@ Node_t* Get_Object(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Paren(int* position, Node_t** mas_tokenov)
 {
-    printf("GetParen\n");
+    // printf("GetParen\n");
     if (mas_tokenov[*position]->value.op_code_t != OPEN_BRAC_CODE)
         return NULL;
         
@@ -309,7 +309,7 @@ Node_t* Get_Paren(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Fig_Paren(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Fig_Paren\n");
+    // printf("Get_Fig_Paren\n");
     if (mas_tokenov[*position]->value.op_code_t != OPEN_FIG_BRAC_CODE)
         return NULL;
         
@@ -325,12 +325,12 @@ Node_t* Get_Fig_Paren(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_N(int* position, Node_t** mas_tokenov)
 {
-    printf("GetN\n");
+    // printf("GetN\n");
 
     if (mas_tokenov[*position]->type == NUM_CODE)
     {
         Node_t* val = Make_Node(NUM_CODE, {.num_t = mas_tokenov[*position]->value.num_t}); 
-        printf("val = %lg\n", val->value.num_t);
+        // printf("val = %lg\n", val->value.num_t);
         (*position)++;
         return val;
     }
@@ -340,7 +340,7 @@ Node_t* Get_N(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Func(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_func\n");
+    // printf("Get_func\n");
     Node_t* val = NULL;
 
     if (mas_tokenov[*position]->value.op_code_t >= SIN_CODE && mas_tokenov[*position]->value.op_code_t <= LN_CODE)
@@ -356,7 +356,7 @@ Node_t* Get_Func(int* position, Node_t** mas_tokenov)
 
 Node_t* Get_Var(int* position, Node_t** mas_tokenov)
 {
-    printf("Get_Var\n");
+    // printf("Get_Var\n");
     Node_t* val = NULL;
 
     if (mas_tokenov[*position]->type == VAR_CODE)

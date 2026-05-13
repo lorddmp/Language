@@ -18,7 +18,7 @@ int Obrabotka_node(Node_t* node, FILE* fp);
 
 void Converting(tree_t tree)
 {
-    FILE* fp = fopen("Back_end/Commands.txt", "w");
+    FILE* fp = fopen("Back_end_my_asm/Commands.txt", "w"); 
 
     Obrabotka_node(tree.root_node, fp);
 
@@ -29,6 +29,7 @@ void Converting(tree_t tree)
 
 int Obrabotka_node(Node_t* node, FILE* fp)
 {
+    // printf("NODE: type = %d, left = %p, right = %p\n", node->type, node->left, node->right);
     if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
         Obrabotka_node(node->right, fp);
 
@@ -86,7 +87,7 @@ int Obrabotka_node(Node_t* node, FILE* fp)
     }
 
 
-    if (node->value.op_code_t == ADD_CODE)          // Сорри что так убого, МАЛО ВРЕМЕНИ, потом исправлю
+    if (node->value.op_code_t == ADD_CODE)
         fprintf(fp, "ADD\n");
     else if (node->value.op_code_t == SUB_CODE)
         fprintf(fp, "SUB\n");
@@ -94,6 +95,8 @@ int Obrabotka_node(Node_t* node, FILE* fp)
         fprintf(fp, "MUL\n");
     else if (node->value.op_code_t == DIV_CODE)
         fprintf(fp, "DIV\n");
+    else if (node->value.op_code_t == POW_CODE)
+        fprintf(fp, "POW\n");
     
     return 0;
 }

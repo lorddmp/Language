@@ -1,5 +1,5 @@
-#ifndef READ_TREE
-#define READ_TREE
+#ifndef READ_TREE_NAASM
+#define READ_TREE_NASM
 
 #include "structs_defines_types.h"
 

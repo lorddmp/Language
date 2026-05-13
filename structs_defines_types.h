@@ -34,7 +34,7 @@ enum oper_codes{
     SUB_CODE = 2,
     MUL_CODE = 3,
     DIV_CODE = 4,
-    STEPEN_CODE = 5,
+    POW_CODE = 5,
 
     SIN_CODE = 6,
     COS_CODE = 7,

@@ -386,8 +386,8 @@ StackErr_t SLEEP_CASE(str_processor* processor)
 
 bool Is_Zero(data_t a, data_t b)
 {
-    if (a - b < 1e-9)
-        return 0;
-    else
+    if (abs(a - b) < 1e-9)
         return 1;
+    else
+        return 0;
 }

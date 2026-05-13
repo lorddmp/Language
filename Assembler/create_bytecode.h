@@ -1,7 +1,7 @@
 #ifndef BYTECODE
 #define BYTECODE
 
-#define NAME_INPUT_FILE "Back_end/Commands.txt"
+#define NAME_INPUT_FILE "Back_end_my_asm/Commands.txt"
 #define NAME_BYTECODE_FILE "Assembler/bytecode_file"
 
 #include "stack.h"
@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #define MAX_LEN_COMMAND 100
-#define NUM_COMMAND 24
+#define NUM_COMMAND 25
 #define SIZE_MASSIVE 1024
 #define METKA_NUM 10
 
@@ -27,7 +27,8 @@ enum
     MUL_CODE = 5,
     DIV_CODE = 6,
     SQRT_CODE = 7,
-    IN_CODE = 8,
+    POW_CODE = 8,
+    IN_CODE = 9,
     PUSHR_CODE = 33, 
     POPR_CODE = 42,
     JB_CODE = 50,
@@ -59,6 +60,7 @@ const cmd_and_codes massive_structur[NUM_COMMAND] = {
     {"MUL", MUL_CODE, 3},
     {"DIV", DIV_CODE, 3},
     {"SQRT", SQRT_CODE, 4},
+    {"POW", POW_CODE, 3},
     {"IN", IN_CODE, 2},
     {"HLT", HLT_CODE, 3},
     {"JAE", JAE_CODE, 3},

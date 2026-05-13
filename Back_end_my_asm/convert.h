@@ -1,5 +1,5 @@
-#ifndef CONVERT
-#define CONVERT
+#ifndef CONVERT_MY_ASM
+#define CONVERT_MY_ASM
 
 #include "structs_defines_types.h"
 

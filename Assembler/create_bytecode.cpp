@@ -76,57 +76,57 @@ StackErr_t Create_Bytecode(void)
 StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_command, table_names* massive_metok, int* num_elements, int num_prohod, struct stat buf,  FILE* fpp)
 {
     char command[MAX_LEN_COMMAND] = {0};
-    int cmd = 0, n = 0, adr_metka = 0;
+    int cmd = 0, skip = 0, adr_metka = 0;
     StackErr_t err = NO_ERRORS;
 
-    for (int i = 0, j = 0; j < buf.st_size; i++)
+    for (int byte_ptr = 0, mas_cmd_ptr = 0; mas_cmd_ptr < buf.st_size; byte_ptr++)
     {
-        Skip_Spaces(massive_command, &j);
+        Skip_Spaces(massive_command, &mas_cmd_ptr);
         char* metka_name = (char*)calloc(100, sizeof(char));
 
-        cmd = sscanf(massive_command + j, "%s", command);
+        cmd = sscanf(massive_command + mas_cmd_ptr, "%s", command);
 
         if (cmd == 0 || cmd == -1) 
             break;
 
-        Skip_Spaces(massive_command, &j);
-        *num_elements = i + 1;
+        Skip_Spaces(massive_command, &mas_cmd_ptr);
+        *num_elements = byte_ptr + 1;
 
-        if (sscanf(command, ":%s%n", metka_name, &n) != 0)
+        if (sscanf(command, ":%s%n", metka_name, &skip) != 0)
         {
-            for (int t = 0; t < METKA_NUM; t++)
+            for (int mas_mark_ptr = 0; mas_mark_ptr < METKA_NUM; mas_mark_ptr++)
             {
-                if (massive_metok[t].len == 0)
+                if (massive_metok[mas_mark_ptr].len == 0)
                 {
-                    adr_metka = t;
+                    adr_metka = mas_mark_ptr;
                     break;
                 }
 
-                if (t == METKA_NUM)
+                if (mas_mark_ptr == METKA_NUM)
                 {
                     printf("Code error: %d. You can't create more variables than %d\n", ILLEGAL_METKA, METKA_NUM);
                     return ILLEGAL_METKA;
                 }
             }
 
-            massive_metok[adr_metka].byte = i;
+            massive_metok[adr_metka].byte = byte_ptr;
             massive_metok[adr_metka].name = metka_name;
-            massive_metok[adr_metka].len = n - 1;
-            j += n;
-            i--;
+            massive_metok[adr_metka].len = skip - 1;
+            mas_cmd_ptr += skip;
+            byte_ptr--;
             continue;
         }
 
-        if (i + (int)sizeof(data_t) >= SIZE_MASSIVE)
+        if (byte_ptr + (int)sizeof(data_t) >= SIZE_MASSIVE)
         {
             if (num_prohod == 2)
-                fwrite(massive_bytecode, sizeof(unsigned char), (size_t)i, fpp);
+                fwrite(massive_bytecode, sizeof(unsigned char), (size_t)byte_ptr, fpp);
 
-            i = 0;
+            byte_ptr = 0;
             *num_elements = 1;
         }
 
-        int cmd_code = Find_command_code(command, &j);
+        int cmd_code = Find_command_code(command, &mas_cmd_ptr);
 
         if (cmd_code == -1)
         {
@@ -134,15 +134,15 @@ StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_comm
             return ILLEGAL_COMMAND;
         }
 
-        massive_bytecode[i] = (unsigned char)cmd_code; 
+        massive_bytecode[byte_ptr] = (unsigned char)cmd_code; 
 
         if (cmd_code == PUSH_CODE)
         {
-            if ((err = Work_With_PushValue(massive_bytecode, massive_command, num_elements, &i, &j)) == ERROR_PUSH_NUM)
+            if ((err = Work_With_PushValue(massive_bytecode, massive_command, num_elements, &byte_ptr, &mas_cmd_ptr)) == ERROR_PUSH_NUM)
             {
-                if ((err = Work_With_Register(massive_bytecode, massive_command, num_elements, cmd_code, &i, &j)) == ILLEGAL_REGISTER)
+                if ((err = Work_With_Register(massive_bytecode, massive_command, num_elements, cmd_code, &byte_ptr, &mas_cmd_ptr)) == ILLEGAL_REGISTER)
                 {
-                    IF_ERROR_COMPILER(Work_Oper_Memory(massive_bytecode, massive_command, num_elements, cmd_code, &i, &j))
+                    IF_ERROR_COMPILER(Work_Oper_Memory(massive_bytecode, massive_command, num_elements, cmd_code, &byte_ptr, &mas_cmd_ptr))
                     continue;
                 }
 
@@ -160,9 +160,9 @@ StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_comm
 
         else if (cmd_code == POP_CODE)
         {
-            if ((err = Work_With_Register(massive_bytecode, massive_command, num_elements, cmd_code, &i, &j)) == ILLEGAL_REGISTER)
+            if ((err = Work_With_Register(massive_bytecode, massive_command, num_elements, cmd_code, &byte_ptr, &mas_cmd_ptr)) == ILLEGAL_REGISTER)
             {
-                if ((err = Work_Oper_Memory(massive_bytecode, massive_command, num_elements, cmd_code, &i, &j)) == ILLEGAL_REGISTER)
+                if ((err = Work_Oper_Memory(massive_bytecode, massive_command, num_elements, cmd_code, &byte_ptr, &mas_cmd_ptr)) == ILLEGAL_REGISTER)
                     continue;
                 
                 if (err != NO_ERRORS)
@@ -178,7 +178,7 @@ StackErr_t String_Processing(unsigned char* massive_bytecode, char* massive_comm
         }
 
         else if (cmd_code >= JB_CODE && cmd_code <= CALL_CODE)
-            IF_ERROR_COMPILER(Work_With_Jump(massive_bytecode, massive_command, massive_metok, num_elements, &i, &j))
+            IF_ERROR_COMPILER(Work_With_Jump(massive_bytecode, massive_command, massive_metok, num_elements, &byte_ptr, &mas_cmd_ptr))
     }
 
     return NO_ERRORS;
