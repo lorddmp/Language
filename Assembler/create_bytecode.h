@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 #define MAX_LEN_COMMAND 100
-#define NUM_COMMAND 25
+#define NUM_COMMAND 30
 #define SIZE_MASSIVE 1024
 #define METKA_NUM 10
 
@@ -22,12 +22,23 @@ enum
     HLT_CODE = 0,
     PUSH_CODE = 1,
     POP_CODE = 2,
+
     ADD_CODE = 3,
     SUB_CODE = 4,
     MUL_CODE = 5,
     DIV_CODE = 6,
     SQRT_CODE = 7,
     POW_CODE = 8,
+    SIN_CODE = 10,
+    COS_CODE = 11,
+    TAN_CODE = 12,
+    COTAN_CODE = 13,
+    ARCSIN_CODE = 14,
+    ARCCOS_CODE = 15,
+    ARCTAN_CODE = 16,
+    ARCCOTAN_CODE = 17,
+    LN_CODE = 18,
+
     IN_CODE = 9,
     PUSHR_CODE = 33, 
     POPR_CODE = 42,
@@ -55,12 +66,23 @@ struct cmd_and_codes{
 const cmd_and_codes massive_structur[NUM_COMMAND] = {
     {"PUSH", PUSH_CODE, 4},
     {"POP", POP_CODE, 3},
+
     {"ADD", ADD_CODE, 3},
     {"SUB", SUB_CODE, 3},
     {"MUL", MUL_CODE, 3},
     {"DIV", DIV_CODE, 3},
     {"SQRT", SQRT_CODE, 4},
     {"POW", POW_CODE, 3},
+    {"SIN", SIN_CODE, 3},
+    {"COS", COS_CODE, 3},
+    {"TAN", TAN_CODE, 3},
+    {"COTAN", COTAN_CODE, 5},
+    {"ARCSIN", ARCSIN_CODE, 6},
+    {"ARCCOS", ARCCOS_CODE, 6},
+    {"ARCTAN", ARCTAN_CODE, 6},
+    {"ARCCOTAN", ARCCOTAN_CODE, 8},
+    {"LN", LN_CODE, 2},
+    
     {"IN", IN_CODE, 2},
     {"HLT", HLT_CODE, 3},
     {"JAE", JAE_CODE, 3},

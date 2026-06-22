@@ -6,16 +6,28 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#define NUM_FUNCS 34
+
 #define GEN_FUNC_DECLARATION(funcname)        \
 StackErr_t funcname(str_processor* processor);
 
 GEN_FUNC_DECLARATION(PUSH_CASE)
-GEN_FUNC_DECLARATION(POP_CASE)
+GEN_FUNC_DECLARATION(POP_CASE) 
 GEN_FUNC_DECLARATION(ADD_CASE)
 GEN_FUNC_DECLARATION(SUB_CASE)
 GEN_FUNC_DECLARATION(MUL_CASE)
 GEN_FUNC_DECLARATION(DIV_CASE)
 GEN_FUNC_DECLARATION(SQRT_CASE)
+GEN_FUNC_DECLARATION(POW_CASE)
+GEN_FUNC_DECLARATION(SIN_CASE)
+GEN_FUNC_DECLARATION(COS_CASE)
+GEN_FUNC_DECLARATION(TAN_CASE)
+GEN_FUNC_DECLARATION(COTAN_CASE)
+GEN_FUNC_DECLARATION(ARCSIN_CASE)
+GEN_FUNC_DECLARATION(ARCCOS_CASE)
+GEN_FUNC_DECLARATION(ARCTAN_CASE)
+GEN_FUNC_DECLARATION(ARCCOTAN_CASE)
+GEN_FUNC_DECLARATION(LN_CASE)
 GEN_FUNC_DECLARATION(IN_CASE)
 GEN_FUNC_DECLARATION(PUSHR_CASE)
 GEN_FUNC_DECLARATION(POPR_CASE)
@@ -46,15 +58,27 @@ struct functions
     int CMD_CODE;
 };
 
-functions func_mas[NUM_COMMAND]
+functions func_mas[NUM_FUNCS]
 {
     {PUSH_CASE, "PUSH", PUSH_CODE},
     {POP_CASE, "POP", POP_CODE},
+
     {ADD_CASE, "ADD", ADD_CODE},
     {SUB_CASE, "SUB", SUB_CODE},
     {MUL_CASE, "MUL", MUL_CODE},
     {DIV_CASE, "DIV", DIV_CODE},
     {SQRT_CASE, "SQRT", SQRT_CODE},
+    {POW_CASE, "POW", POW_CODE},
+    {SIN_CASE, "SIN", SIN_CODE},
+    {COS_CASE, "COS", COS_CODE},
+    {TAN_CASE, "TAN", TAN_CODE},
+    {COTAN_CASE, "COTAN", COTAN_CODE},
+    {ARCSIN_CASE, "ARCSIN", ARCSIN_CODE},
+    {ARCCOS_CASE, "ARCCOS", ARCCOS_CODE},
+    {ARCTAN_CASE, "ARCTAN", ARCTAN_CODE},
+    {ARCCOTAN_CASE, "ARCCOTAN", ARCCOTAN_CODE},
+    {LN_CASE, "LN", LN_CODE},
+
     {IN_CASE, "IN", IN_CODE},
     {PUSHR_CASE, "PUSHR", PUSHR_CODE},
     {POPR_CASE, "POPR", POPR_CODE},
@@ -193,16 +217,16 @@ StackErr_t DIV_CASE(str_processor* processor)
 {
     StackErr_t err = NO_ERRORS;
 
-    data_t a = StackPop(&processor->stk, &err);
+    data_t value1 = StackPop(&processor->stk, &err);
     IF_ERROR(err, processor->stk);
 
-    data_t b = StackPop(&processor->stk, &err);
+    data_t value2 = StackPop(&processor->stk, &err);
     IF_ERROR(err, processor->stk);
 
-    if (_Is_Zero(a))
+    if (_Is_Zero(value1))
         printf("NA NOL DELIT NELZYA!\n");
     else
-        IF_ERROR(StackPush(&processor->stk, b / a), processor->stk)
+        IF_ERROR(StackPush(&processor->stk, value2 / value1), processor->stk)
 
     return NO_ERRORS;
 }
@@ -210,11 +234,69 @@ StackErr_t DIV_CASE(str_processor* processor)
 StackErr_t SQRT_CASE(str_processor* processor)
 {
     StackErr_t err = NO_ERRORS;
-    data_t A = StackPop(&processor->stk, &err);
+    data_t value = StackPop(&processor->stk, &err);
     IF_ERROR(err, processor->stk)
 
-    IF_ERROR(StackPush(&processor->stk, sqrt(A)), processor->stk)
+    IF_ERROR(StackPush(&processor->stk, sqrt(value)), processor->stk)
 
+    return NO_ERRORS;
+}
+
+StackErr_t POW_CASE(str_processor* processor)                               
+{                                                                           
+    StackErr_t err = NO_ERRORS;                                             
+    data_t value1 = StackPop(&processor->stk, &err);                        
+    IF_ERROR(err, processor->stk)                                           
+                                                                            
+    data_t value2 = StackPop(&processor->stk, &err);                        
+    IF_ERROR(err, processor->stk)                                           
+
+    IF_ERROR(StackPush(&processor->stk, pow(value2, value1)),processor->stk)
+
+    return NO_ERRORS;                                                       
+}
+
+#define TRIG_FUNCS(funcname, func)                                              \
+StackErr_t funcname(str_processor* processor)                                   \
+{                                                                               \
+    StackErr_t err = NO_ERRORS;                                                 \
+    data_t value1 = StackPop(&processor->stk, &err);                            \
+    IF_ERROR(err, processor->stk)                                               \
+    IF_ERROR(StackPush(&processor->stk, func(value1)),processor->stk)           \
+    return NO_ERRORS;                                                           \
+}
+
+TRIG_FUNCS(SIN_CASE, sin)
+TRIG_FUNCS(COS_CASE, cos)
+TRIG_FUNCS(TAN_CASE, tan)
+StackErr_t COTAN_CASE(str_processor* processor)
+{
+    StackErr_t err = NO_ERRORS;
+    data_t value1 = StackPop(&processor->stk, &err);
+    IF_ERROR(err, processor->stk)
+    IF_ERROR(StackPush(&processor->stk, 1/tan(value1)),processor->stk)
+    return NO_ERRORS;
+}
+
+TRIG_FUNCS(ARCSIN_CASE, asin)
+TRIG_FUNCS(ARCCOS_CASE, acos)
+TRIG_FUNCS(ARCTAN_CASE, atan)
+StackErr_t ARCCOTAN_CASE(str_processor* processor)
+{
+    StackErr_t err = NO_ERRORS;
+    data_t value1 = StackPop(&processor->stk, &err);
+    IF_ERROR(err, processor->stk)
+    IF_ERROR(StackPush(&processor->stk, M_PI/2 - tan(value1)),processor->stk)
+    return NO_ERRORS;
+}
+#undef TRIG_FUNCS
+
+StackErr_t LN_CASE(str_processor* processor)
+{
+    StackErr_t err = NO_ERRORS;
+    data_t value1 = StackPop(&processor->stk, &err);
+    IF_ERROR(err, processor->stk)
+    IF_ERROR(StackPush(&processor->stk, log(value1)),processor->stk)
     return NO_ERRORS;
 }
 

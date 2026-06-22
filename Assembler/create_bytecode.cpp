@@ -201,17 +201,17 @@ int Find_command_code(char* command, int* j)
 StackErr_t Work_With_PushValue(unsigned char* massive_bytecode, char* massive_command, int* num_elements, int* i, int* j)
 {
     data_t num = 0;
-    int n = 0;
+    int skip = 0;
 
     Skip_Spaces(massive_command, j);
 
-    if(sscanf(massive_command + *j, SPEC "%n", &num, &n) == 0)
+    if(sscanf(massive_command + *j, SPEC "%n", &num, &skip) == 0)
         return ERROR_PUSH_NUM; 
 
     *((data_t*)(massive_bytecode + *i + 1)) = num;
     *i += (int)sizeof(data_t);
     *num_elements = *i + 1;
-    *j += n;
+    *j += skip;
 
 
     Skip_Spaces(massive_command, j);

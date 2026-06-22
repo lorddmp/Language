@@ -12,11 +12,11 @@
 // End -> {tree_root} Tree <endcode>
 // Tree -> [Decl ';']*
 // Decl -> Init | Equat | Expr | If_While | Printf
-// Init -> 'var' Var '=' Expr
-// Equat -> 'now' Var '=' Expr
+// Init -> 'переменночка' Var '=' Expr
+// Equat -> 'тепереча' Var '=' Expr
 // Expr -> AS ['==' ... Expr]*
-// If_While -> ['if'|'while'] Paren Fig_Paren
-// Printf -> 'printf Paren
+// If_While -> ['ежели'|'покудова'] Paren Fig_Paren
+// Printf -> 'напечатай' Paren
 // AS  -> MD ['+'|'-' AS]*
 // MD  -> Pow ['*'|'/' MD]*
 // Pow -> Object ['^' Pow]*

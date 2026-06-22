@@ -1,18 +1,28 @@
 #include "convert.h"
 
-#define MATH_FUNCS 4 // функции которые есть и в языке, и в процессоре
+#define MATH_FUNCS 14 // функции которые есть и в языке, и в процессоре
 
 struct str {
     oper_codes op_code;
-    const char* cmd_code;
+    const char* cmd_name;
 };
 
-// str mas_codes[MATH_FUNCS] = {
-//     {ADD_CODE, "ADD\n", },
-//     {SUB_CODE, "SUB\n"},
-//     {MUL_CODE, "MUL\n"},
-//     {DIV_CODE, "DIV\n"},
-// };
+str mas_codes[MATH_FUNCS] = {
+    {ADD_CODE,      "ADD"},
+    {SUB_CODE,      "SUB"},
+    {MUL_CODE,      "MUL"},
+    {DIV_CODE,      "DIV"},
+    {POW_CODE,      "POW"},
+    {SIN_CODE,      "SIN"},
+    {COS_CODE,      "COS"},
+    {TAN_CODE,      "TAN"},
+    {COTAN_CODE,    "COTAN"},
+    {ARCSIN_CODE,   "ARCSIN"},
+    {ARCCOS_CODE,   "ARCCOS"},
+    {ARCTAN_CODE,   "ARCTAN"},
+    {ARCCOTAN_CODE, "ARCCOTAN"},
+    {LN_CODE,       "LN"},
+};
 
 int Obrabotka_node(Node_t* node, FILE* fp);
 
@@ -86,17 +96,11 @@ int Obrabotka_node(Node_t* node, FILE* fp)
         return 0;
     }
 
-
-    if (node->value.op_code_t == ADD_CODE)
-        fprintf(fp, "ADD\n");
-    else if (node->value.op_code_t == SUB_CODE)
-        fprintf(fp, "SUB\n");
-    else if (node->value.op_code_t == MUL_CODE)
-        fprintf(fp, "MUL\n");
-    else if (node->value.op_code_t == DIV_CODE)
-        fprintf(fp, "DIV\n");
-    else if (node->value.op_code_t == POW_CODE)
-        fprintf(fp, "POW\n");
+    for (int i = 0; i < MATH_FUNCS; i++)
+    {
+        if (node->value.op_code_t == mas_codes[i].op_code)
+            fprintf(fp, "%s\n", mas_codes[i].cmd_name);
+    }
     
     return 0;
 }
