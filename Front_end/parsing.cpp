@@ -8,32 +8,13 @@
 #include <string.h>
 #include <math.h>
 
-// РБНФ
-// End -> {tree_root} Tree <endcode>
-// Tree -> [Decl ';']*
-// Decl -> Init | Equat | Expr | If_While | Printf
-// Init -> 'переменночка' Var '=' Expr
-// Equat -> 'тепереча' Var '=' Expr
-// Expr -> AS ['==' ... Expr]*
-// If_While -> ['ежели'|'покудова'] Paren Fig_Paren
-// Printf -> 'напечатай' Paren
-// AS  -> MD ['+'|'-' AS]*
-// MD  -> Pow ['*'|'/' MD]*
-// Pow -> Object ['^' Pow]*
-// Object -> Paren | N | Func | Var
-// Fig_Paren -> '{' Tree '}'
-// Paren -> '(' EXPR ')' ////////////////
-// N -> 0-9*
-// Func -> 'sin' Paren
-// Var -> a-zA-Z_
-
 #define ERROR(filename, funcname, line)                                                             \
 {                                                                                                   \
     fprintf(stderr, "Error in file: %s, function: %s, line: %d\n", filename, funcname, line);       \
     return NULL;                                                                                    \
 }
 
-#define IF_ERROR_READING(a)                                         \
+#define IF_ERROR_READING(a)                                 \
 if (a == NULL)                                              \
     return NULL;                                            \
 
@@ -54,7 +35,7 @@ Node_t* Get_Object(int* position, Node_t** mas_tokenov);
 Node_t* Get_Paren(int* position, Node_t** mas_tokenov);
 Node_t* Get_Fig_Paren(int* position, Node_t** mas_tokenov);
 Node_t* Get_N(int* position, Node_t** mas_tokenov);
-Node_t* Get_Func(int* position, Node_t** mas_tokenov);
+Node_t* Get_TrigLn(int* position, Node_t** mas_tokenov);
 Node_t* Get_Var(int* position, Node_t** mas_tokenov);
 
 tree_t Parsing(Node_t** mas_tokenov)
@@ -181,12 +162,14 @@ Node_t* Get_Expr(int* position, Node_t** mas_tokenov)
     Node_t* val = Get_AS(position, mas_tokenov);
     IF_ERROR_READING(val)
 
-    while (mas_tokenov[*position]->value.op_code_t == DOUBLE_EQ_CODE)
+    while (mas_tokenov[*position]->value.op_code_t >= DOUBLE_EQ_CODE and 
+            mas_tokenov[*position]->value.op_code_t <= LESS_OR_EQ_CODE)
     {
+        oper_codes oper = mas_tokenov[*position]->value.op_code_t;
         (*position)++;
         Node_t* val2 = Get_AS(position, mas_tokenov);
         IF_ERROR_READING(val2)
-        val = Make_Node(OPER_CODE, {.op_code_t = DOUBLE_EQ_CODE}, val, val2);
+        val = Make_Node(OPER_CODE, {.op_code_t = oper}, val, val2);
     }
     return val;
 }
@@ -284,7 +267,7 @@ Node_t* Get_Object(int* position, Node_t** mas_tokenov)
 
     if ((val = Get_Paren(position, mas_tokenov)) == NULL)
         if ((val = Get_N(position, mas_tokenov)) == NULL)
-            if ((val = Get_Func(position, mas_tokenov)) == NULL)
+            if ((val = Get_TrigLn(position, mas_tokenov)) == NULL)
                 if ((val = Get_Var(position, mas_tokenov)) == NULL)
                     return NULL;
 
@@ -338,7 +321,7 @@ Node_t* Get_N(int* position, Node_t** mas_tokenov)
         return NULL;
 }
 
-Node_t* Get_Func(int* position, Node_t** mas_tokenov)
+Node_t* Get_TrigLn(int* position, Node_t** mas_tokenov)
 {
     // printf("Get_func\n");
     Node_t* val = NULL;

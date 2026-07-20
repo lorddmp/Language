@@ -32,6 +32,6 @@ int main()
     Tree_Destructor(tree.root_node);
 
     fclose(fp);
-    printf("\033[32mMIDDLE_END ENDED SUCCESSFULLY\n");
+    printf("\033[32mMIDDLE_END ENDED SUCCESSFULLY\033[0m\n");
     return 0;
 }

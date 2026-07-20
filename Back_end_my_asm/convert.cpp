@@ -1,13 +1,14 @@
 #include "convert.h"
 
-#define MATH_FUNCS 14 // функции которые есть и в языке, и в процессоре
+#define MATH_FUNCS 14
+#define LOG_FUNCS 6
 
 struct str {
     oper_codes op_code;
     const char* cmd_name;
 };
 
-str mas_codes[MATH_FUNCS] = {
+str math_codes[MATH_FUNCS] = {
     {ADD_CODE,      "ADD"},
     {SUB_CODE,      "SUB"},
     {MUL_CODE,      "MUL"},
@@ -22,6 +23,15 @@ str mas_codes[MATH_FUNCS] = {
     {ARCTAN_CODE,   "ARCTAN"},
     {ARCCOTAN_CODE, "ARCCOTAN"},
     {LN_CODE,       "LN"},
+};
+
+str log_codes[LOG_FUNCS] = {
+    {DOUBLE_EQ_CODE,    "JE"},
+    {NOT_EQ_CODE,       "JNE"},
+    {MORE_CODE,         "JB"},
+    {MORE_OR_EQ_CODE,   "JBE"},
+    {LESS_CODE,         "JA"},
+    {LESS_OR_EQ_CODE,   "JAE"},
 };
 
 int Obrabotka_node(Node_t* node, FILE* fp);
@@ -98,8 +108,21 @@ int Obrabotka_node(Node_t* node, FILE* fp)
 
     for (int i = 0; i < MATH_FUNCS; i++)
     {
-        if (node->value.op_code_t == mas_codes[i].op_code)
-            fprintf(fp, "%s\n", mas_codes[i].cmd_name);
+        if (node->value.op_code_t == math_codes[i].op_code)
+            fprintf(fp, "%s\n", math_codes[i].cmd_name);
+    }
+
+    for (int i = 0; i < LOG_FUNCS; i++)
+    {
+        if (node->value.op_code_t == log_codes[i].op_code)
+        {
+            fprintf(fp, "%s :%p\n", log_codes[i].cmd_name, node->left);
+            fprintf(fp, "PUSH 0\n");
+            fprintf(fp, "JMP :%p\n", node->right);
+            fprintf(fp, ":%p\n", node->left);
+            fprintf(fp, "PUSH 1\n");
+            fprintf(fp, ":%p\n", node->right);
+        }
     }
     
     return 0;

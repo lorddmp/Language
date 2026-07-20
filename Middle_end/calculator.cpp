@@ -5,14 +5,14 @@
 #include <stdio.h>
 #include <math.h>
 
-#define NUM_MATH_OPER 14
+#define NUM_MATH_AND_LOG_OPER 20
 
 struct functions{
     double(*funcname)(tree_t* tree, Node_t* node, errors* err);
     enum oper_codes func_code;
 };
 
-functions mas_functions[NUM_MATH_OPER] = {
+functions mas_functions[NUM_MATH_AND_LOG_OPER] = {
     {ADD_CASE, ADD_CODE},
     {SUB_CASE, SUB_CODE},
     {MUL_CASE, MUL_CODE},
@@ -27,7 +27,12 @@ functions mas_functions[NUM_MATH_OPER] = {
     {ARCTAN_CASE, ARCTAN_CODE},
     {ARCCOTAN_CASE, ARCCOTAN_CODE},
     {LN_CASE, LN_CODE},
-
+    {DOUBLE_EQ_CASE, DOUBLE_EQ_CODE},
+    {NOT_EQ_CASE, NOT_EQ_CODE},
+    {MORE_CASE, MORE_CODE},
+    {MORE_OR_EQ_CASE, MORE_OR_EQ_CODE},
+    {LESS_CASE, LESS_CODE},
+    {LESS_OR_EQ_CASE, LESS_OR_EQ_CODE},
 };
 
 double Calculate(tree_t* tree, Node_t* node, errors* err)
@@ -45,7 +50,7 @@ double Calculate(tree_t* tree, Node_t* node, errors* err)
         if (isnan(a) || isnan(b))
             return NAN;
         
-        for (int i = 0; i < NUM_MATH_OPER; i++)
+        for (int i = 0; i < NUM_MATH_AND_LOG_OPER; i++)
             if (mas_functions[i].func_code == node->value.op_code_t)
             {
                 double c = mas_functions[i].funcname(tree, node, err);

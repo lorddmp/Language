@@ -11,6 +11,6 @@ int main()
     Converting(tree);
 
     Tree_Destructor(tree.root_node);
-    printf("\033[32mBACK_END ENDED SUCCESSFULLY\n");
+    printf("\033[32mBACK_END ENDED SUCCESSFULLY\033[0m\n");
     return 0;
 }

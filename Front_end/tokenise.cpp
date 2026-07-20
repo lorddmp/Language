@@ -15,16 +15,6 @@ oper_t massive_op[NUM_OPER] = {
     {"*",           MUL_CODE,               1},
     {"/",           DIV_CODE,               1},
     {"^",           POW_CODE,               1},
-    {"(",           OPEN_BRAC_CODE,         1},
-    {")",           CLOSED_BRAC_CODE,       1},
-    {"{",           OPEN_FIG_BRAC_CODE,     1},
-    {"}",           CLOSE_FIG_BRAC_CODE,    1},
-    {"==",          DOUBLE_EQ_CODE,         2},
-    {"=",           EQUA_CODE,              1},
-    {"переменночка",VAR_INIT_CODE,          24},
-    {"тепереча",    CHANGE_VAR_CODE,        16},
-    {";",           SEMICOLONE_CODE,        1},
-
     {"синус",       SIN_CODE,               10},
     {"косинус",     COS_CODE,               14},
     {"тангенс",     TAN_CODE,               14},
@@ -34,6 +24,22 @@ oper_t massive_op[NUM_OPER] = {
     {"арктангенс",  ARCTAN_CODE,            20},
     {"арккотангенс",ARCCOTAN_CODE,          24},
     {"логарифм",    LN_CODE,                16},
+
+    {"==",          DOUBLE_EQ_CODE,         2},
+    {"!=",          NOT_EQ_CODE,            2},
+    {">=",          MORE_OR_EQ_CODE,        2},
+    {">",           MORE_CODE,              1},
+    {"<=",          LESS_OR_EQ_CODE,        2},
+    {"<",           LESS_CODE,              1},
+    
+    {"(",           OPEN_BRAC_CODE,         1},
+    {")",           CLOSED_BRAC_CODE,       1},
+    {"{",           OPEN_FIG_BRAC_CODE,     1},
+    {"}",           CLOSE_FIG_BRAC_CODE,    1},
+    {"=",           EQUA_CODE,              1},
+    {"переменночка",VAR_INIT_CODE,          24},
+    {"тепереча",    CHANGE_VAR_CODE,        16},
+    {";",           SEMICOLONE_CODE,        1},
 
     {"ежели",       IF_CODE,                10},
     {"покудова",    WHILE_CODE,             16},
@@ -45,7 +51,6 @@ oper_t massive_op[NUM_OPER] = {
     fprintf(stderr, "Error in file: %s, function: %s, line: %d", filename, funcname, line);         \
     return NULL;                                                                                    \
 }                                                                                                   \
-
 
 Node_t** Tokenize(char** massive_var)
 {
@@ -80,9 +85,8 @@ Node_t** Tokenize(char** massive_var)
         {
             if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0)
             {
-                if (j >= NUM_OPER - 10 &&   (isalpha(massive_code[position + massive_op[j].len]) || 
-                                            isdigit(massive_code[position + massive_op[j].len]) ||
-                                            massive_code[position + massive_op[j].len] == '_'))
+                if ((massive_op[j].op_code == SUB_CODE) && !((massive_tokenov[i-1]->type == NUM_CODE) ||    //-number?
+                                                            (massive_tokenov[i-1]->type == VAR_CODE)))
                     break;
 
                 position += massive_op[j].len;

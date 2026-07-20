@@ -37,6 +37,6 @@ int main()
     free(massive_var);
     fclose(fp);
 
-    printf("\033[32mFRONT_END ENDED SUCCESSFULLY\n");
+    printf("\033[32mFRONT_END ENDED SUCCESSFULLY\033[0m\n");
     return 0;
 }

@@ -5,7 +5,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define ARITHMETIC_FUNC(funcname, sign)                                 \
+//ЗАЧЕМ ПЕРЕДАВАТЬ tree???????????????
+
+#define ARITHMETIC_AND_LOG_FUNC(funcname, sign)                         \
 double funcname(tree_t* tree, Node_t* node, errors* err)                \
 {                                                                       \
     if (node->left == NULL || node->right == NULL)                      \
@@ -22,11 +24,10 @@ double funcname(tree_t* tree, Node_t* node, errors* err)                \
 }
 
 
-ARITHMETIC_FUNC(ADD_CASE, +)
-ARITHMETIC_FUNC(SUB_CASE, -)
-ARITHMETIC_FUNC(MUL_CASE, *) 
+ARITHMETIC_AND_LOG_FUNC(ADD_CASE, +)
+ARITHMETIC_AND_LOG_FUNC(SUB_CASE, -)
+ARITHMETIC_AND_LOG_FUNC(MUL_CASE, *) 
 
-#undef ARITHMETIC_FUNC
 
 double DIV_CASE(tree_t* tree, Node_t* node, errors* err)
 {
@@ -48,6 +49,44 @@ double DIV_CASE(tree_t* tree, Node_t* node, errors* err)
         return NAN;
     return a/b;
 }
+
+double DOUBLE_EQ_CASE(tree_t* tree, Node_t* node, errors* err)
+{
+    if (node->left == NULL || node->right == NULL)
+    {
+        fprintf (stderr, "Empty node where it needs to be filled\n");
+        *err = NODE_NULL;
+        return 1;
+    }
+    double a = Calculate(tree, node->left, err);
+    double b = Calculate(tree, node->right, err);
+    
+    if (isnan(a) || isnan(b))
+        return NAN;
+    return Is_Zero(a-b);
+}
+
+double NOT_EQ_CASE(tree_t* tree, Node_t* node, errors* err)
+{
+    if (node->left == NULL || node->right == NULL)
+    {
+        fprintf (stderr, "Empty node where it needs to be filled\n");
+        *err = NODE_NULL;
+        return 1;
+    }
+    double a = Calculate(tree, node->left, err);
+    double b = Calculate(tree, node->right, err);
+    
+    if (isnan(a) || isnan(b))
+        return NAN;
+    return !(Is_Zero(a-b));
+}
+ARITHMETIC_AND_LOG_FUNC(MORE_CASE, >) 
+ARITHMETIC_AND_LOG_FUNC(MORE_OR_EQ_CASE, >=) 
+ARITHMETIC_AND_LOG_FUNC(LESS_CASE, <) 
+ARITHMETIC_AND_LOG_FUNC(LESS_OR_EQ_CASE, <=) 
+
+#undef ARITHMETIC_AND_LOG_FUNC
 
 double STEPEN_CASE(tree_t* tree, Node_t* node, errors* err)
 {
