@@ -57,12 +57,12 @@ oper_t massive_op[NUM_OPER] = {
     return NULL;                                                                                    \
 }                                                                                                   \
 
-Node_t** Tokenize(char** massive_name)
+Node_t** Tokenize(char** massive_name, int size_mas_names)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
 
-    int num_of_tokens = 1000;
-    Node_t** massive_tokenov = (Node_t**)calloc(num_of_tokens, sizeof(Node_t*));
+    int size_mas_tokens = 1000;
+    Node_t** massive_tokenov = (Node_t**)calloc((size_t)size_mas_tokens, sizeof(Node_t*));
     if (massive_tokenov == NULL)
         ERROR(__FILE__, __func__, __LINE__)
 
@@ -87,10 +87,10 @@ Node_t** Tokenize(char** massive_name)
         if (massive_code[position_code] == '\0')
             break;
 
-        if (position_tokens == num_of_tokens)
+        if (position_tokens == size_mas_tokens)
         {
-            num_of_tokens *= 2;
-            massive_tokenov = (Node_t**)realloc(massive_tokenov, num_of_tokens);
+            size_mas_tokens *= 2;
+            massive_tokenov = (Node_t**)realloc(massive_tokenov, (size_t)size_mas_tokens);
             if (massive_tokenov == NULL)
                 ERROR(__FILE__, __func__, __LINE__)
         }
@@ -144,6 +144,14 @@ Node_t** Tokenize(char** massive_name)
                 massive_tokenov[position_tokens] = Make_Node(NAME_CODE, {.name_ind = num_name});
                 num_name++;
                 found = true;
+
+                if (num_name == size_mas_names)
+                {
+                    size_mas_names *= 2;
+                    massive_name = (char**)realloc(massive_name, (size_t)size_mas_names);
+                    if (massive_name == NULL)
+                        ERROR(__FILE__, __func__, __LINE__)
+                }
             }
         }
 

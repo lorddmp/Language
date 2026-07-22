@@ -2,7 +2,6 @@
 #define STRUCTS
 
 #define READ_TREE_FILE "Math_problem.txt"
-#define MAX_NUM_OF_NAMES 100
 #define NUM_OPER 33
 
 #define IF_ERROR(arg)                                                                                   \
@@ -13,13 +12,6 @@ do {                                                                            
         return NULL;                                                                                    \
     }                                                                                                   \
 } while (0)
-
-struct hash {
-    char name[10];
-    int hash_len;
-    int index;
-    double var_value;
-};
 
 enum type_codes{
     OPER_CODE = 1,
@@ -72,13 +64,13 @@ enum oper_codes{
 
 struct oper_t{
     const char* op_symb;
-    enum oper_codes op_code;
+    oper_codes op_code;
     int len;
 };
 
 union value_dif
 {
-    enum oper_codes op_code_t;
+    oper_codes op_code_t;
     int name_ind;
     double num_t;
 };
@@ -92,9 +84,8 @@ struct Node_t {
 };
 
 struct tree_t {
-    int num_var;
+    int num_names;
     Node_t* root_node;
-    hash* hash_table;
 };
 
 enum errors{

@@ -13,9 +13,11 @@
 int main()
 {
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "w");
-    char** massive_var = (char**)calloc(MAX_NUM_OF_NAMES, sizeof(char*));
 
-    Node_t** mas_tokens = Tokenize(massive_var);
+    int size_mas_names = 100;
+    char** massive_name = (char**)calloc((size_t)size_mas_names, sizeof(char*));
+
+    Node_t** mas_tokens = Tokenize(massive_name, size_mas_names);
 
     if (mas_tokens == NULL)
         return 1;
@@ -34,7 +36,7 @@ int main()
     free(mas_tokens);
     Tree_Destructor(tree.root_node);
 
-    free(massive_var);
+    free(massive_name);
     fclose(fp);
 
     printf("\033[32mFRONT_END ENDED SUCCESSFULLY\033[0m\n");
