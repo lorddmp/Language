@@ -17,10 +17,10 @@ bool Sem_analysis(tree_t tree)
 
 bool Looking_for_init(Node_t* node, bool* mas_existing_var)
 {
-    if (node->type == OPER_CODE && node->value.op_code_t == VAR_INIT_CODE)
-        mas_existing_var[node->left->value.var_ind] = true;
+    if (node->type == OPER_CODE && (node->value.op_code_t == VAR_INIT_CODE || node->value.op_code_t == FUNC_INIT_CODE))
+        mas_existing_var[node->left->value.name_ind] = true;
 
-    else if (node->type == VAR_CODE && mas_existing_var[node->value.var_ind] == false)
+    else if (node->type == NAME_CODE && mas_existing_var[node->value.name_ind] == false)
     {
             fprintf(stderr, "Error in semantic analysis\n");
             return false;
@@ -33,7 +33,7 @@ bool Looking_for_init(Node_t* node, bool* mas_existing_var)
         IF_ERROR_SEMANT(Looking_for_init(node->left, mas_existing_var));
 
     if (node->right != NULL && node->right->type == OPER_CODE && node->right->value.op_code_t == VAR_INIT_CODE) //{x = 8}
-        mas_existing_var[node->right->left->value.var_ind] = false;                                             //x += 5;
+        mas_existing_var[node->right->left->value.name_ind] = false;                                             //x += 5;
 
     return true;
 }

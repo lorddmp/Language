@@ -2,7 +2,8 @@
 #define STRUCTS
 
 #define READ_TREE_FILE "Math_problem.txt"
-#define NUM_OPER 31
+#define MAX_NUM_OF_NAMES 100
+#define NUM_OPER 33
 
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
@@ -22,10 +23,9 @@ struct hash {
 
 enum type_codes{
     OPER_CODE = 1,
-    VAR_CODE = 2,
+    NAME_CODE = 2,
     NUM_CODE = 3,
     BODY_CODE = 4,
-    FUNC_CODE = 67,
     TREE_ROOT_CODE = 2007,
 };
 
@@ -65,6 +65,9 @@ enum oper_codes{
     CHANGE_VAR_CODE = 29,
     WHILE_CODE = 30,
     PRINTF_CODE = 31,
+
+    FUNC_INIT_CODE = 32,
+    FUNC_CALL_CODE = 33,
 };
 
 struct oper_t{
@@ -76,7 +79,7 @@ struct oper_t{
 union value_dif
 {
     enum oper_codes op_code_t;
-    int var_ind;
+    int name_ind;
     double num_t;
 };
 

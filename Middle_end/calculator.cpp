@@ -41,7 +41,7 @@ double Calculate(tree_t* tree, Node_t* node, errors* err)
         return 0;
     if (node->type == NUM_CODE)
         return node->value.num_t;
-    else if (node->type == VAR_CODE)
+    else if (node->type == NAME_CODE)
         return NAN;
     else
     {

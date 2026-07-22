@@ -10,40 +10,43 @@
 void Skip_Spaces(char* massive_code, int* position);
 
 oper_t massive_op[NUM_OPER] = {
-    {"+",           ADD_CODE,               1},
-    {"-",           SUB_CODE,               1},
-    {"*",           MUL_CODE,               1},
-    {"/",           DIV_CODE,               1},
-    {"^",           POW_CODE,               1},
-    {"синус",       SIN_CODE,               10},
-    {"косинус",     COS_CODE,               14},
-    {"тангенс",     TAN_CODE,               14},
-    {"котангенс",   COTAN_CODE,             18},
-    {"арксинус",    ARCSIN_CODE,            16},
-    {"арккосинус",  ARCCOS_CODE,            20},
-    {"арктангенс",  ARCTAN_CODE,            20},
-    {"арккотангенс",ARCCOTAN_CODE,          24},
-    {"логарифм",    LN_CODE,                16},
+    {"+",               ADD_CODE,               1},
+    {"-",               SUB_CODE,               1},
+    {"*",               MUL_CODE,               1},
+    {"/",               DIV_CODE,               1},
+    {"^",               POW_CODE,               1},
+    {"синус",           SIN_CODE,               10},
+    {"косинус",         COS_CODE,               14},
+    {"тангенс",         TAN_CODE,               14},
+    {"котангенс",       COTAN_CODE,             18},
+    {"арксинус",        ARCSIN_CODE,            16},
+    {"арккосинус",      ARCCOS_CODE,            20},
+    {"арктангенс",      ARCTAN_CODE,            20},
+    {"арккотангенс",    ARCCOTAN_CODE,          24},
+    {"логарифм",        LN_CODE,                16},
 
-    {"==",          DOUBLE_EQ_CODE,         2},
-    {"!=",          NOT_EQ_CODE,            2},
-    {">=",          MORE_OR_EQ_CODE,        2},
-    {">",           MORE_CODE,              1},
-    {"<=",          LESS_OR_EQ_CODE,        2},
-    {"<",           LESS_CODE,              1},
+    {"==",              DOUBLE_EQ_CODE,         2},
+    {"!=",              NOT_EQ_CODE,            2},
+    {">=",              MORE_OR_EQ_CODE,        2},
+    {">",               MORE_CODE,              1},
+    {"<=",              LESS_OR_EQ_CODE,        2},
+    {"<",               LESS_CODE,              1},
     
-    {"(",           OPEN_BRAC_CODE,         1},
-    {")",           CLOSED_BRAC_CODE,       1},
-    {"{",           OPEN_FIG_BRAC_CODE,     1},
-    {"}",           CLOSE_FIG_BRAC_CODE,    1},
-    {"=",           EQUA_CODE,              1},
-    {"переменночка",VAR_INIT_CODE,          24},
-    {"тепереча",    CHANGE_VAR_CODE,        16},
-    {";",           SEMICOLONE_CODE,        1},
+    {"(",               OPEN_BRAC_CODE,         1},
+    {")",               CLOSED_BRAC_CODE,       1},
+    {"{",               OPEN_FIG_BRAC_CODE,     1},
+    {"}",               CLOSE_FIG_BRAC_CODE,    1},
+    {"=",               EQUA_CODE,              1},
+    {"переменночка",    VAR_INIT_CODE,          24},
+    {"тепереча",        CHANGE_VAR_CODE,        16},
+    {";",               SEMICOLONE_CODE,        1},
 
-    {"ежели",       IF_CODE,                10},
-    {"покудова",    WHILE_CODE,             16},
-    {"напечатай",   PRINTF_CODE,            18},
+    {"ежели",           IF_CODE,                10},
+    {"покудова",        WHILE_CODE,             16},
+    {"напечатай",       PRINTF_CODE,            18},
+
+    {"функция",         FUNC_INIT_CODE,         14},
+    {"вызови",          FUNC_CALL_CODE,         12},
 };
 
 #define ERROR(filename, funcname, line)                                                             \
@@ -52,14 +55,14 @@ oper_t massive_op[NUM_OPER] = {
     return NULL;                                                                                    \
 }                                                                                                   \
 
-Node_t** Tokenize(char** massive_var)
+Node_t** Tokenize(char** massive_name)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
     Node_t** massive_tokenov = (Node_t**)calloc(1000, sizeof(Node_t*));
-    char var[100] = {};
+    char name[100] = {};
 
     double num = 0;
-    int num_var = 0, skip = 0, count = 0;
+    int num_name = 0, skip = 0, count = 0;
     struct stat stat1 = {};
     int descriptor = fileno(fp);
 
@@ -86,7 +89,7 @@ Node_t** Tokenize(char** massive_var)
             if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0)
             {
                 if ((massive_op[j].op_code == SUB_CODE) && !((massive_tokenov[i-1]->type == NUM_CODE) ||    //-number?
-                                                            (massive_tokenov[i-1]->type == VAR_CODE)))
+                                                            (massive_tokenov[i-1]->type == NAME_CODE)))
                     break;
 
                 position += massive_op[j].len;
@@ -107,16 +110,18 @@ Node_t** Tokenize(char** massive_var)
             continue;
         }
 
-        if (found == false && sscanf(&massive_code[position], "%[A-Za-z0-9_]%n", var, &skip) != 0)
+        if (found == false && sscanf(&massive_code[position], "%[A-Za-z0-9_]%n", name, &skip) != 0)
         {
             position += skip;
 
-            for (int j = 0; j < num_var && found == false; j++)
+            Skip_Spaces(massive_code, &position);
+
+            for (int j = 0; j < num_name && found == false; j++)
             {
-                if (strncmp(var, massive_var[j], (size_t)skip) == 0)
+                if (strncmp(name, massive_name[j], (size_t)skip) == 0)
                 {
-                    massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = j});
-                    // printf("Created node var: val = %d\n", j);
+                    massive_tokenov[i] = Make_Node(NAME_CODE, {.name_ind = j});
+                    // printf("Created node name: val = %d\n", j);
                     found = true;
                     break;
                 }
@@ -124,10 +129,10 @@ Node_t** Tokenize(char** massive_var)
 
             if (!found)
             {
-                massive_var[num_var] = strdup(var);
-                massive_tokenov[i] = Make_Node(VAR_CODE, {.var_ind = num_var});
-                // printf("Created new node var: val = %d\n", num_var);
-                num_var++;
+                massive_name[num_name] = strdup(name);
+                massive_tokenov[i] = Make_Node(NAME_CODE, {.name_ind = num_name});
+                // printf("Created new node name: val = %d\n", num_name);
+                num_name++;
                 found = true;
             }
         }

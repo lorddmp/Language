@@ -13,7 +13,7 @@
 int main()
 {
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "w");
-    char** massive_var = (char**)calloc(100, sizeof(char*));
+    char** massive_var = (char**)calloc(MAX_NUM_OF_NAMES, sizeof(char*));
 
     Node_t** mas_tokens = Tokenize(massive_var);
 

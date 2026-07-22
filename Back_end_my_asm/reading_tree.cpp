@@ -89,9 +89,9 @@ Node_t* Obrabotka_Node(int* position, char* massive)
             sscanf(&massive[*position], "%d%n", (int*)&new_node_value_op, &skip);
             node = Make_Node(new_node_type, {.op_code_t = new_node_value_op});
             break;
-        case VAR_CODE: 
+        case NAME_CODE: 
             sscanf(&massive[*position], "%d%n", &new_node_value_var, &skip);
-            node = Make_Node(new_node_type, {.var_ind = new_node_value_var});
+            node = Make_Node(new_node_type, {.name_ind = new_node_value_var});
             break;
         case BODY_CODE: 
             node = Make_Node(new_node_type, {});
