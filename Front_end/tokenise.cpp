@@ -7,7 +7,9 @@
 #include <string.h>
 #include <ctype.h>
 
-void Skip_Spaces(char* massive_code, int* position);
+#define MAX_LEN_OF_NAME 100
+
+void Skip_Spaces(char* massive_code, int* position_code);
 
 oper_t massive_op[NUM_OPER] = {
     {"+",               ADD_CODE,               1},
@@ -58,71 +60,80 @@ oper_t massive_op[NUM_OPER] = {
 Node_t** Tokenize(char** massive_name)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
-    Node_t** massive_tokenov = (Node_t**)calloc(1000, sizeof(Node_t*));
-    char name[100] = {};
+
+    int num_of_tokens = 1000;
+    Node_t** massive_tokenov = (Node_t**)calloc(num_of_tokens, sizeof(Node_t*));
+    if (massive_tokenov == NULL)
+        ERROR(__FILE__, __func__, __LINE__)
+
+    char name[MAX_LEN_OF_NAME] = {};
 
     double num = 0;
-    int num_name = 0, skip = 0, count = 0;
+    int num_name = 0, skip = 0, num_tokens = 0;
+
     struct stat stat1 = {};
     int descriptor = fileno(fp);
-
     fstat(descriptor, &stat1);
 
     char* massive_code = (char*)calloc((size_t)stat1.st_size + 1, sizeof(char));
+    if (massive_code ==  NULL)
+        ERROR(__FILE__, __func__, __LINE__)
 
     fread(massive_code, sizeof(char), (size_t)stat1.st_size, fp);
 
-    for (int position = 0, i = 0; massive_code[position] != '\0'; i++)
+    for (int position_code = 0, position_tokens = 0; massive_code[position_code] != '\0'; position_tokens++)
     {
-        Skip_Spaces(massive_code, &position);
-        // printf("%s", &massive_code[position]);
-        if (massive_code[position] == '\0')
+        Skip_Spaces(massive_code, &position_code);
+        if (massive_code[position_code] == '\0')
             break;
 
-        bool found = false;
-        count = i + 1;
-
-        // printf("position = %d\n", position);
-        // printf("symb = %c\n", massive_code[position]);
-        for (int j = 0; j < NUM_OPER && found == false; j++)
+        if (position_tokens == num_of_tokens)
         {
-            if (strncmp(&massive_code[position], massive_op[j].op_symb, (size_t)massive_op[j].len) == 0)
+            num_of_tokens *= 2;
+            massive_tokenov = (Node_t**)realloc(massive_tokenov, num_of_tokens);
+            if (massive_tokenov == NULL)
+                ERROR(__FILE__, __func__, __LINE__)
+        }
+
+        bool found = false;
+        num_tokens = position_tokens + 1;
+
+        for (int position_mas_op = 0; position_mas_op < NUM_OPER; position_mas_op++)
+        {
+            if (strncmp(&massive_code[position_code], massive_op[position_mas_op].op_symb, (size_t)massive_op[position_mas_op].len) == 0)
             {
-                if ((massive_op[j].op_code == SUB_CODE) && !((massive_tokenov[i-1]->type == NUM_CODE) ||    //-number?
-                                                            (massive_tokenov[i-1]->type == NAME_CODE)))
+                if ((massive_op[position_mas_op].op_code == SUB_CODE) &&    !((massive_tokenov[position_tokens-1]->type == NUM_CODE) || 
+                                                                            (massive_tokenov[position_tokens-1]->type == NAME_CODE))) //-12? -10?
                     break;
 
-                position += massive_op[j].len;
-                massive_tokenov[i] = Make_Node(OPER_CODE, {.op_code_t = massive_op[j].op_code});
-                // printf("Created node oper: val = %d\n", massive_op[j].op_code);
+                position_code += massive_op[position_mas_op].len;
+                massive_tokenov[position_tokens] = Make_Node(OPER_CODE, {.op_code_t = massive_op[position_mas_op].op_code});
                 found = true;
                 break;
             }
         }
-        
-        if (found == false && sscanf(&massive_code[position], "%lg%n", &num, &skip) != 0)
-        {
-            // printf("symb = %c\n", massive_code[position]);
-            massive_tokenov[i] = Make_Node(NUM_CODE, {.num_t = num});
-            // printf("Created node num: val = %lg\n", num);
-            position += skip;
-            found = true;
+
+        if (found)
             continue;
+
+        else if (sscanf(&massive_code[position_code], "%lg%n", &num, &skip) != 0)
+        {
+            massive_tokenov[position_tokens] = Make_Node(NUM_CODE, {.num_t = num});
+            position_code += skip;
+            found = true;
         }
 
-        if (found == false && sscanf(&massive_code[position], "%[A-Za-z0-9_]%n", name, &skip) != 0)
+        else if (sscanf(&massive_code[position_code], "%[A-Za-z0-9_]%n", name, &skip) != 0)
         {
-            position += skip;
-
-            Skip_Spaces(massive_code, &position);
 
             for (int j = 0; j < num_name && found == false; j++)
             {
                 if (strncmp(name, massive_name[j], (size_t)skip) == 0)
                 {
-                    massive_tokenov[i] = Make_Node(NAME_CODE, {.name_ind = j});
-                    // printf("Created node name: val = %d\n", j);
+                    massive_tokenov[position_tokens] = Make_Node(NAME_CODE, {.name_ind = j});
+                    position_code += skip;
                     found = true;
+
                     break;
                 }
             }
@@ -130,27 +141,26 @@ Node_t** Tokenize(char** massive_name)
             if (!found)
             {
                 massive_name[num_name] = strdup(name);
-                massive_tokenov[i] = Make_Node(NAME_CODE, {.name_ind = num_name});
-                // printf("Created new node name: val = %d\n", num_name);
+                massive_tokenov[position_tokens] = Make_Node(NAME_CODE, {.name_ind = num_name});
                 num_name++;
                 found = true;
             }
         }
-        
-        if (found == false)
+
+        else
             ERROR(__FILE__, __func__, __LINE__)
     }
 
 
-    massive_tokenov[count] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
+    massive_tokenov[num_tokens] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
 
     free(massive_code);
 
     return massive_tokenov;
 }
 
-void Skip_Spaces(char* massive_code, int* position)
+void Skip_Spaces(char* massive_code, int* position_code)
 {
-    while (isspace(massive_code[*position]))
-        (*position)++;
+    while (isspace(massive_code[*position_code]))
+        (*position_code)++;
 }
