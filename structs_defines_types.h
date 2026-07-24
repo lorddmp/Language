@@ -41,7 +41,7 @@ enum oper_codes{
     OPEN_BRAC_CODE = 15,
     CLOSED_BRAC_CODE = 16,
     OPEN_FIG_BRAC_CODE = 17,
-    CLOSE_FIG_BRAC_CODE = 18,
+    CLOSED_FIG_BRAC_CODE = 18,
     SEMICOLONE_CODE = 19,
 
     DOUBLE_EQ_CODE = 20,
@@ -78,14 +78,8 @@ union value_dif
 struct Node_t {
     Node_t* left;
     Node_t* right;
-    Node_t* parent;
     type_codes type;
     value_dif value;
-};
-
-struct tree_t {
-    int num_names;
-    Node_t* root_node;
 };
 
 enum errors{

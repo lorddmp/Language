@@ -9,9 +9,9 @@
 
 #define MAX_LEN_OF_NAME 100
 
-void Skip_Spaces(char* massive_code, int* position_code);
+void Skip_Spaces(char* code_array, int* pos_code);
 
-oper_t massive_op[NUM_OPER] = {
+oper_t oper_array[NUM_OPER] = {
     {"+",               ADD_CODE,               1},
     {"-",               SUB_CODE,               1},
     {"*",               MUL_CODE,               1},
@@ -37,7 +37,7 @@ oper_t massive_op[NUM_OPER] = {
     {"(",               OPEN_BRAC_CODE,         1},
     {")",               CLOSED_BRAC_CODE,       1},
     {"{",               OPEN_FIG_BRAC_CODE,     1},
-    {"}",               CLOSE_FIG_BRAC_CODE,    1},
+    {"}",               CLOSED_FIG_BRAC_CODE,    1},
     {"=",               EQUA_CODE,              1},
     {"переменночка",    VAR_INIT_CODE,          24},
     {"тепереча",        CHANGE_VAR_CODE,        16},
@@ -57,57 +57,57 @@ oper_t massive_op[NUM_OPER] = {
     return NULL;                                                                                    \
 }                                                                                                   \
 
-Node_t** Tokenize(char** massive_name, int size_mas_names)
+Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
 
-    int size_mas_tokens = 1000;
-    Node_t** massive_tokenov = (Node_t**)calloc((size_t)size_mas_tokens, sizeof(Node_t*));
-    if (massive_tokenov == NULL)
+    int size_token_array = 1000;
+    Node_t** token_array = (Node_t**)calloc((size_t)size_token_array, sizeof(Node_t*));
+    if (token_array == NULL)
         ERROR(__FILE__, __func__, __LINE__)
 
     char name[MAX_LEN_OF_NAME] = {};
 
     double num = 0;
-    int num_name = 0, skip = 0, num_tokens = 0;
+    int skip = 0, num_token = 0;
 
     struct stat stat1 = {};
     int descriptor = fileno(fp);
     fstat(descriptor, &stat1);
 
-    char* massive_code = (char*)calloc((size_t)stat1.st_size + 1, sizeof(char));
-    if (massive_code ==  NULL)
+    char* code_array = (char*)calloc((size_t)stat1.st_size + 1, sizeof(char));
+    if (code_array ==  NULL)
         ERROR(__FILE__, __func__, __LINE__)
 
-    fread(massive_code, sizeof(char), (size_t)stat1.st_size, fp);
+    fread(code_array, sizeof(char), (size_t)stat1.st_size, fp);
 
-    for (int position_code = 0, position_tokens = 0; massive_code[position_code] != '\0'; position_tokens++)
+    for (int pos_code = 0, pos_tokens = 0; code_array[pos_code] != '\0'; pos_tokens++)
     {
-        Skip_Spaces(massive_code, &position_code);
-        if (massive_code[position_code] == '\0')
+        Skip_Spaces(code_array, &pos_code);
+        if (code_array[pos_code] == '\0')
             break;
 
-        if (position_tokens == size_mas_tokens)
+        if (pos_tokens == size_token_array)
         {
-            size_mas_tokens *= 2;
-            massive_tokenov = (Node_t**)realloc(massive_tokenov, (size_t)size_mas_tokens);
-            if (massive_tokenov == NULL)
+            size_token_array *= 2;
+            token_array = (Node_t**)realloc(token_array, (size_t)size_token_array);
+            if (token_array == NULL)
                 ERROR(__FILE__, __func__, __LINE__)
         }
 
         bool found = false;
-        num_tokens = position_tokens + 1;
+        num_token = pos_tokens + 1;
 
-        for (int position_mas_op = 0; position_mas_op < NUM_OPER; position_mas_op++)
+        for (int pos_opers = 0; pos_opers < NUM_OPER; pos_opers++)
         {
-            if (strncmp(&massive_code[position_code], massive_op[position_mas_op].op_symb, (size_t)massive_op[position_mas_op].len) == 0)
+            if (strncmp(&code_array[pos_code], oper_array[pos_opers].op_symb, (size_t)oper_array[pos_opers].len) == 0)
             {
-                if ((massive_op[position_mas_op].op_code == SUB_CODE) &&    !((massive_tokenov[position_tokens-1]->type == NUM_CODE) || 
-                                                                            (massive_tokenov[position_tokens-1]->type == NAME_CODE))) //-12? -10?
+                if ((oper_array[pos_opers].op_code == SUB_CODE) &&    !((token_array[pos_tokens-1]->type == NUM_CODE) || 
+                                                                            (token_array[pos_tokens-1]->type == NAME_CODE))) //-12? -10?
                     break;
 
-                position_code += massive_op[position_mas_op].len;
-                massive_tokenov[position_tokens] = Make_Node(OPER_CODE, {.op_code_t = massive_op[position_mas_op].op_code});
+                pos_code += oper_array[pos_opers].len;
+                token_array[pos_tokens] = Make_Node(OPER_CODE, {.op_code_t = oper_array[pos_opers].op_code});
                 found = true;
                 break;
             }
@@ -116,22 +116,22 @@ Node_t** Tokenize(char** massive_name, int size_mas_names)
         if (found)
             continue;
 
-        else if (sscanf(&massive_code[position_code], "%lg%n", &num, &skip) != 0)
+        else if (sscanf(&code_array[pos_code], "%lg%n", &num, &skip) != 0)
         {
-            massive_tokenov[position_tokens] = Make_Node(NUM_CODE, {.num_t = num});
-            position_code += skip;
+            token_array[pos_tokens] = Make_Node(NUM_CODE, {.num_t = num});
+            pos_code += skip;
             found = true;
         }
 
-        else if (sscanf(&massive_code[position_code], "%[A-Za-z0-9_]%n", name, &skip) != 0)
+        else if (sscanf(&code_array[pos_code], "%[A-Za-z0-9_]%n", name, &skip) != 0)
         {
 
-            for (int j = 0; j < num_name && found == false; j++)
+            for (int j = 0; j < *num_name && found == false; j++)
             {
-                if (strncmp(name, massive_name[j], (size_t)skip) == 0)
+                if (strncmp(name, name_array[j], (size_t)skip) == 0)
                 {
-                    massive_tokenov[position_tokens] = Make_Node(NAME_CODE, {.name_ind = j});
-                    position_code += skip;
+                    token_array[pos_tokens] = Make_Node(NAME_CODE, {.name_ind = j});
+                    pos_code += skip;
                     found = true;
 
                     break;
@@ -140,16 +140,16 @@ Node_t** Tokenize(char** massive_name, int size_mas_names)
 
             if (!found)
             {
-                massive_name[num_name] = strdup(name);
-                massive_tokenov[position_tokens] = Make_Node(NAME_CODE, {.name_ind = num_name});
+                name_array[*num_name] = strdup(name);
+                token_array[pos_tokens] = Make_Node(NAME_CODE, {.name_ind = *num_name});
                 num_name++;
                 found = true;
 
-                if (num_name == size_mas_names)
+                if (*num_name == size_name_array)
                 {
-                    size_mas_names *= 2;
-                    massive_name = (char**)realloc(massive_name, (size_t)size_mas_names);
-                    if (massive_name == NULL)
+                    size_name_array *= 2;
+                    name_array = (char**)realloc(name_array, (size_t)size_name_array);
+                    if (name_array == NULL)
                         ERROR(__FILE__, __func__, __LINE__)
                 }
             }
@@ -160,15 +160,15 @@ Node_t** Tokenize(char** massive_name, int size_mas_names)
     }
 
 
-    massive_tokenov[num_tokens] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
+    token_array[num_token] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
 
-    free(massive_code);
+    free(code_array);
 
-    return massive_tokenov;
+    return token_array;
 }
 
-void Skip_Spaces(char* massive_code, int* position_code)
+void Skip_Spaces(char* code_array, int* pos_code)
 {
-    while (isspace(massive_code[*position_code]))
-        (*position_code)++;
+    while (isspace(code_array[*pos_code]))
+        (*pos_code)++;
 }

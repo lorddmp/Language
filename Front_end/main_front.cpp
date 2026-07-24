@@ -14,29 +14,29 @@ int main()
 {
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "w");
 
-    int size_mas_names = 100;
-    char** massive_name = (char**)calloc((size_t)size_mas_names, sizeof(char*));
+    int size_name_array = 100, num_name = 0;
+    char** name_array = (char**)calloc((size_t)size_name_array, sizeof(char*));
 
-    Node_t** mas_tokens = Tokenize(massive_name, size_mas_names);
+    Node_t** token_array = Tokenize(name_array, size_name_array, &num_name);
 
-    if (mas_tokens == NULL)
+    if (token_array == NULL)
         return 1;
 
-    tree_t tree = Parsing(mas_tokens);
+    Node_t* root_node = Parsing(token_array);
 
-    if (tree.root_node == NULL)
+    if (root_node == NULL)
         return 1;
 
-    if (Sem_analysis(tree) == false)
+    if (Sem_analysis(root_node, num_name) == false)
         return 1;
 
-    Print_Tree(tree.root_node);
-    Save_Tree(tree.root_node, fp);
+    Print_Tree(root_node);
+    Save_Tree(root_node, fp);
 
-    free(mas_tokens);
-    Tree_Destructor(tree.root_node);
+    free(token_array);
+    Tree_Destructor(root_node);
 
-    free(massive_name);
+    free(name_array);
     fclose(fp);
 
     printf("\033[32mFRONT_END ENDED SUCCESSFULLY\033[0m\n");

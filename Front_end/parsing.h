@@ -3,6 +3,6 @@
 
 #include "structs_defines_types.h"
 
-tree_t Parsing(Node_t** mas_tokenov);
+Node_t* Parsing(Node_t** mas_tokenov);
 
 #endif
