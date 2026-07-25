@@ -2,25 +2,25 @@
 #define CALC_FUNCS
 #include "structs_defines_types.h"
 
-double ADD_CASE(tree_t* tree, Node_t* node, errors* err);
-double SUB_CASE(tree_t* tree, Node_t* node, errors* err);
-double MUL_CASE(tree_t* tree, Node_t* node, errors* err);
-double DIV_CASE(tree_t* tree, Node_t* node, errors* err);
-double STEPEN_CASE(tree_t* tree, Node_t* node, errors* err);
-double SIN_CASE(tree_t* tree, Node_t* node, errors* err);
-double COS_CASE(tree_t* tree, Node_t* node, errors* err);
-double TAN_CASE(tree_t* tree, Node_t* node, errors* err);
-double COTAN_CASE(tree_t* tree, Node_t* node, errors* err);
-double ARCSIN_CASE(tree_t* tree, Node_t* node, errors* err);
-double ARCCOS_CASE(tree_t* tree, Node_t* node, errors* err);
-double ARCTAN_CASE(tree_t* tree, Node_t* node, errors* err);
-double ARCCOTAN_CASE(tree_t* tree, Node_t* node, errors* err);
-double LN_CASE(tree_t* tree, Node_t* node, errors* err);
-double DOUBLE_EQ_CASE(tree_t* tree, Node_t* node, errors* err);
-double NOT_EQ_CASE(tree_t* tree, Node_t* node, errors* err);
-double MORE_CASE(tree_t* tree, Node_t* node, errors* err);
-double MORE_OR_EQ_CASE(tree_t* tree, Node_t* node, errors* err);
-double LESS_CASE(tree_t* tree, Node_t* node, errors* err);
-double LESS_OR_EQ_CASE(tree_t* tree, Node_t* node, errors* err);
+double ADD_CASE(Node_t* node, errors* err);
+double SUB_CASE(Node_t* node, errors* err);
+double MUL_CASE(Node_t* node, errors* err);
+double DIV_CASE(Node_t* node, errors* err);
+double STEPEN_CASE(Node_t* node, errors* err);
+double SIN_CASE(Node_t* node, errors* err);
+double COS_CASE(Node_t* node, errors* err);
+double TAN_CASE(Node_t* node, errors* err);
+double COTAN_CASE(Node_t* node, errors* err);
+double ARCSIN_CASE(Node_t* node, errors* err);
+double ARCCOS_CASE(Node_t* node, errors* err);
+double ARCTAN_CASE(Node_t* node, errors* err);
+double ARCCOTAN_CASE(Node_t* node, errors* err);
+double LN_CASE(Node_t* node, errors* err);
+double DOUBLE_EQ_CASE(Node_t* node, errors* err);
+double NOT_EQ_CASE(Node_t* node, errors* err);
+double MORE_CASE(Node_t* node, errors* err);
+double MORE_OR_EQ_CASE(Node_t* node, errors* err);
+double LESS_CASE(Node_t* node, errors* err);
+double LESS_OR_EQ_CASE(Node_t* node, errors* err);
 
 #endif

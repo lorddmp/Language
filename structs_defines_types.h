@@ -78,6 +78,7 @@ union value_dif
 struct Node_t {
     Node_t* left;
     Node_t* right;
+    Node_t* parent;
     type_codes type;
     value_dif value;
 };

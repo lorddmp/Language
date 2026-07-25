@@ -12,24 +12,22 @@
 int main()
 {
     FILE* fp = fopen(SAVEFILE_NAME_MIDDLE, "w");
-    tree_t tree = {
-        .root_node = Read_Tree(),
-    };
+    Node_t* root_node = Read_Tree();
 
     errors err = NO_ERRORS;
 
-    Calculate(&tree, tree.root_node, &err);
+    Calculate(root_node, &err);
 
     if (err != NO_ERRORS)
     {
-        printf("ERROR ERR\n");
+        printf("ERROR\n");
         return 1;
     }
 
-    Save_Tree(tree.root_node, fp);
-    Print_Tree(tree.root_node);
+    Save_Tree(root_node, fp);
+    Print_Tree(root_node);
 
-    Tree_Destructor(tree.root_node);
+    Tree_Destructor(root_node);
 
     fclose(fp);
     printf("\033[32mMIDDLE_END ENDED SUCCESSFULLY\033[0m\n");

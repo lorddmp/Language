@@ -37,7 +37,7 @@ oper_t oper_array[NUM_OPER] = {
     {"(",               OPEN_BRAC_CODE,         1},
     {")",               CLOSED_BRAC_CODE,       1},
     {"{",               OPEN_FIG_BRAC_CODE,     1},
-    {"}",               CLOSED_FIG_BRAC_CODE,    1},
+    {"}",               CLOSED_FIG_BRAC_CODE,   1},
     {"=",               EQUA_CODE,              1},
     {"переменночка",    VAR_INIT_CODE,          24},
     {"тепереча",        CHANGE_VAR_CODE,        16},
@@ -142,7 +142,8 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
             {
                 name_array[*num_name] = strdup(name);
                 token_array[pos_tokens] = Make_Node(NAME_CODE, {.name_ind = *num_name});
-                num_name++;
+                pos_code += skip;
+                (*num_name)++;
                 found = true;
 
                 if (*num_name == size_name_array)

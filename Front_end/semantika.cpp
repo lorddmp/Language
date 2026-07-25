@@ -11,11 +11,13 @@ bool Looking_for_init(Node_t* node, bool* if_var_exist_array);
 
 bool Sem_analysis(Node_t* root_node, int num_name)
 {
-    bool* if_var_exist_array = (bool*)calloc(num_name, sizeof(bool));
+    bool* if_var_exist_array = (bool*)calloc((size_t)num_name, sizeof(bool));
 
     if (if_var_exist_array == NULL)
-        printf ("CALLOC ERROR\n");
+    {
+        fprintf (stderr, "CALLOC ERROR\n");
         return false;
+    }
 
     bool is_there_no_errors = Looking_for_init(root_node, if_var_exist_array);
 
