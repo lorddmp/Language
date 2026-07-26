@@ -208,7 +208,7 @@ StackErr_t funcname(str_processor* processor)                               \
 }
   
 GEN_ARIPHMETIC(ADD_CASE, +)
-GEN_ARIPHMETIC(SUB_CASE, -)
+GEN_ARIPHMETIC(SUB_CASE, -) 
 GEN_ARIPHMETIC(MUL_CASE, *) 
 
 #undef GEN_ARIPHMETIC

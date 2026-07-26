@@ -8,7 +8,7 @@
 #include "processor.h"
 #include <stdio.h>
 
-#define MAX_LEN_COMMAND 100
+#define MAX_LEN_COMMAND_NAME 100
 #define NUM_COMMAND 30
 #define SIZE_MASSIVE 1024
 #define METKA_NUM 10
@@ -58,12 +58,12 @@ enum
 };
 
 struct cmd_and_codes{
-    const char* CMD;
-    unsigned char CMD_CODE;
-    int LEN_CMD;
+    const char* cmd;
+    unsigned char code_cmd;
+    int len_cmd;
 };
 
-const cmd_and_codes massive_structur[NUM_COMMAND] = {
+const cmd_and_codes struct_сmd_array[NUM_COMMAND] = {
     {"PUSH", PUSH_CODE, 4},
     {"POP", POP_CODE, 3},
 

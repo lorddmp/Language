@@ -14,10 +14,10 @@ int main()
 {
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "w");
 
-    int size_name_array = 100, num_name = 0;
+    int size_name_array = 100, num_name = 0, num_token = 0;
     char** name_array = (char**)calloc((size_t)size_name_array, sizeof(char*));
 
-    Node_t** token_array = Tokenize(name_array, size_name_array, &num_name);
+    Node_t** token_array = Tokenize(name_array, size_name_array, &num_name, &num_token);
 
     if (token_array == NULL)
         return 1;
@@ -33,6 +33,8 @@ int main()
     Print_Tree(root_node);
     Save_Tree(root_node, fp);
 
+    ARRAY_DESTRUCTOR(token_array, num_token)
+    ARRAY_DESTRUCTOR(name_array, num_name)
     free(token_array);
     Tree_Destructor(root_node);
 

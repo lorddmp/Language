@@ -57,7 +57,7 @@ oper_t oper_array[NUM_OPER] = {
     return NULL;                                                                                    \
 }                                                                                                   \
 
-Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
+Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* num_token)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");
 
@@ -69,7 +69,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
     char name[MAX_LEN_OF_NAME] = {};
 
     double num = 0;
-    int skip = 0, num_token = 0;
+    int skip = 0;
 
     struct stat stat1 = {};
     int descriptor = fileno(fp);
@@ -96,7 +96,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
         }
 
         bool found = false;
-        num_token = pos_tokens + 1;
+        *num_token = pos_tokens + 1;
 
         for (int pos_opers = 0; pos_opers < NUM_OPER; pos_opers++)
         {
@@ -161,9 +161,11 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name)
     }
 
 
-    token_array[num_token] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
+    token_array[*num_token] = Make_Node(OPER_CODE, {.op_code_t = END_CODE});
+    (*num_token)++;
 
     free(code_array);
+    fclose(fp);
 
     return token_array;
 }

@@ -13,6 +13,10 @@ do {                                                                            
     }                                                                                                   \
 } while (0)
 
+#define ARRAY_DESTRUCTOR(array, num_elem)                       \
+for (int pos_array = 0; pos_array < num_elem; pos_array++)      \
+    free(array[pos_array]);                                     \
+
 enum type_codes{
     OPER_CODE = 1,
     NAME_CODE = 2,
