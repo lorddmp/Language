@@ -58,7 +58,7 @@ struct functions
     int CMD_CODE;
 };
 
-functions func_mas[NUM_FUNCS]
+functions func_array[NUM_FUNCS]
 {
     {PUSH_CASE, "PUSH", PUSH_CODE},
     {POP_CASE, "POP", POP_CODE},
@@ -145,16 +145,16 @@ StackErr_t Run_Commands(str_processor* processor)
     int descriptor = fileno(fpp);
     fstat(descriptor, &buf);
 
-    for (int i = 0;processor->ip < buf.st_size; processor->ip++, i++)
+    for (; processor->ip < buf.st_size; processor->ip++)
     {
         bool func_found = 0;
 
-        for (int j = 0; j < NUM_COMMAND - 1; j++)
+        for (int pos_func_array = 0; pos_func_array < NUM_COMMAND - 1; pos_func_array++)
         {
-            if (func_mas[j].CMD_CODE == processor->buffer_commands[processor->ip])
+            if (func_array[pos_func_array].CMD_CODE == processor->buffer_commands[processor->ip])
             {
                 func_found = true;
-                func_mas[j].funcname(processor);
+                func_array[pos_func_array].funcname(processor);
                 break;
             }
         }
@@ -350,7 +350,7 @@ StackErr_t funcname(str_processor* processor)                                   
 
 GEN_JUMPING(JA_CASE, >)  
 GEN_JUMPING(JAE_CASE, >=)   
-GEN_JUMPING(JB_CASE, <) 
+GEN_JUMPING(JB_CASE, <)
 GEN_JUMPING(JBE_CASE, <=)
  
 #undef GEN_JUMPING
@@ -415,11 +415,9 @@ StackErr_t RET_CASE(str_processor* processor)
 
 StackErr_t PUSHM_CASE(str_processor* processor)
 {
-    IF_ERROR(
-        StackPush(
-            &processor->stk,
-            processor->oper_memory[(int)processor->registr_mas[processor->buffer_commands[processor->ip + 1]]]
-        ),
+    IF_ERROR(StackPush(
+        &processor->stk, 
+        processor->oper_memory[(int)processor->registr_mas[processor->buffer_commands[processor->ip + 1]]]),
         processor->stk
     )
 
@@ -431,10 +429,7 @@ StackErr_t PUSHM_CASE(str_processor* processor)
 StackErr_t POPM_CASE(str_processor* processor)
 {
     StackErr_t err = NO_ERRORS;
-    processor->oper_memory
-    [(int)processor->registr_mas
-    [processor->buffer_commands
-    [processor->ip + 1]]] = StackPop(&processor->stk, &err);
+    processor->oper_memory[(int)processor->registr_mas[processor->buffer_commands[processor->ip + 1]]] = StackPop(&processor->stk, &err);
 
     IF_ERROR(err, processor->stk)
 
@@ -454,7 +449,6 @@ StackErr_t DRAW_CASE(str_processor* processor)
 
     // for (int t = 0; t < OPER_MEMORY_SIZE/DLINA_STROKI_OPER; t++)
     //     printf("\x1b[A");
-    
 
     return NO_ERRORS;
 }
