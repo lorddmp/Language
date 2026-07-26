@@ -11,7 +11,7 @@
 #define MAX_LEN_COMMAND_NAME 100
 #define NUM_COMMAND 30
 #define SIZE_MASSIVE 1024
-#define METKA_NUM 10
+#define MAX_METKA_NUM 10
 
 #define IF_ERROR_COMPILER(arg)        \
     if (arg)                          \

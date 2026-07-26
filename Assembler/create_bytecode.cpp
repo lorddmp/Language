@@ -33,7 +33,7 @@ StackErr_t Create_Bytecode(void)
     struct stat buf = {};
     unsigned char bytecode_array[SIZE_MASSIVE] = {0};
 
-    table_names* mark_array = (table_names*)calloc(METKA_NUM, sizeof(table_names));
+    table_names* mark_array = (table_names*)calloc(MAX_METKA_NUM, sizeof(table_names));
     if (mark_array == NULL)
     {
         fprintf(stderr, "Code error: %d. Calloc error", ERROR_CALLOC);
@@ -82,6 +82,9 @@ StackErr_t Create_Bytecode(void)
 
     fwrite(bytecode_array, sizeof(unsigned char), (size_t)num_elements, fpp);
 
+    for (int pos_mark_array = 0; pos_mark_array < MAX_METKA_NUM && mark_array[pos_mark_array].name != NULL; pos_mark_array++)
+        free(mark_array[pos_mark_array].name);
+
     free(mark_array);
     free(command_array);
     fclose(fpp);
@@ -98,7 +101,6 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
     for (int pos_bytecode_array = 0, pos_command_array = 0; pos_command_array < buf.st_size; pos_bytecode_array++)
     {
         Skip_Spaces(command_array, &pos_command_array);
-        char* mark_name = (char*)calloc(MAX_LEN_MARK_NAME, sizeof(char));
 
         command_was_read = sscanf(command_array + pos_command_array, "%s", command_name);
 
@@ -108,9 +110,17 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
         Skip_Spaces(command_array, &pos_command_array);
         *num_elements = pos_bytecode_array + 1;
 
+        char* mark_name = (char*)calloc(MAX_LEN_MARK_NAME, sizeof(char));
         if (sscanf(command_name, ":%s%n", mark_name, &skip) != 0)
         {
-            for (int mas_mark_ptr = 0; mas_mark_ptr < METKA_NUM; mas_mark_ptr++)
+            if (num_prohod == 2)
+            {
+                free(mark_name);
+                pos_command_array += skip;
+                continue;
+            }
+
+            for (int mas_mark_ptr = 0; mas_mark_ptr < MAX_METKA_NUM; mas_mark_ptr++)
             {
                 if (mark_array[mas_mark_ptr].len == 0)
                 {
@@ -118,9 +128,9 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
                     break;
                 }
 
-                if (mas_mark_ptr == METKA_NUM)
+                if (mas_mark_ptr == MAX_METKA_NUM)
                 {
-                    printf("Code error: %d. You can't create more variables than %d\n", ILLEGAL_METKA, METKA_NUM);
+                    printf("Code error: %d. You can't create more variables than %d\n", ILLEGAL_METKA, MAX_METKA_NUM);
                     return ILLEGAL_METKA;
                 }
             }
@@ -132,6 +142,8 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
             pos_bytecode_array--;
             continue;
         }
+        else
+            free(mark_name);
 
         if (pos_bytecode_array + (int)sizeof(data_t) >= SIZE_MASSIVE)
         {
@@ -277,9 +289,9 @@ StackErr_t Work_With_Jump(unsigned char* bytecode_array, char* command_array, ta
         return ILLEGAL_JUMP_ADDRESS; 
     } 
 
-    for (int pos_mark_array = 0; pos_mark_array < METKA_NUM; pos_mark_array++)
+    for (int pos_mark_array = 0; pos_mark_array < MAX_METKA_NUM; pos_mark_array++)
     {
-        if (pos_mark_array == METKA_NUM - 1 || mark_array[pos_mark_array].len == 0)
+        if (pos_mark_array == MAX_METKA_NUM - 1 || mark_array[pos_mark_array].len == 0)
         {
             *((int*)(bytecode_array + *pos_bytecode_array + 1)) = 0;
             break;

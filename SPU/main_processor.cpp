@@ -20,9 +20,8 @@ int main()
     }
 
     IF_ERROR(StackInit(&processor.stk, 4), processor.stk);
-    IF_ERROR(StackInit(&processor.call_adr, METKA_NUM), processor.call_adr);
+    IF_ERROR(StackInit(&processor.call_adr, MAX_METKA_NUM), processor.call_adr);
 
-    printf("HELLO\n");
     Run_Bytecode(&processor);
 
     IF_ERROR(StackDump(processor.stk), processor.stk);
