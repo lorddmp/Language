@@ -5,6 +5,6 @@
 
 #include <stdio.h>
 
-void Converting(tree_t tree);
+void Converting(Node_t* root_node);
 
 #endif
