@@ -47,7 +47,7 @@ GEN_FUNC_DECLARATION(SLEEP_CASE)
 
 #undef GEN_FUNC_DECLARATION
 
-StackErr_t Run_Commands(str_processor* processor);
+StackErr_t Run_Commands(str_processor* processor, long size_bytecode_file);
 
 bool Is_Zero(data_t a, data_t b);
 
@@ -121,7 +121,7 @@ StackErr_t Run_Bytecode(str_processor* processor)
     
     fread(processor->buffer_commands, sizeof(char), (size_t)buf.st_size, fpp);
     
-    Run_Commands(processor);
+    Run_Commands(processor, buf.st_size);
 
     free(processor->buffer_commands);
 
@@ -130,22 +130,9 @@ StackErr_t Run_Bytecode(str_processor* processor)
     return NO_ERRORS;
 }
 
-StackErr_t Run_Commands(str_processor* processor)
+StackErr_t Run_Commands(str_processor* processor, long size_bytecode_file)
 {
-    struct stat buf = {};
-
-    FILE* fpp = fopen(NAME_BYTECODE_FILE, "r"); 
-
-    if (fpp == NULL)
-    {
-        printf("Code error: %d. Bytecode didn't open\n", ERROR_OPEN_BYTECODE_FILE);
-        return ERROR_OPEN_BYTECODE_FILE;
-    }
-
-    int descriptor = fileno(fpp);
-    fstat(descriptor, &buf);
-
-    for (; processor->ip < buf.st_size; processor->ip++)
+    for (; processor->ip < size_bytecode_file; processor->ip++)
     {
         bool func_found = 0;
 
@@ -171,6 +158,7 @@ StackErr_t Run_Commands(str_processor* processor)
             return ILLEGAL_COMMAND;
         }
     }
+
 
     return NO_ERRORS;
 }

@@ -26,6 +26,9 @@ int main()
 
     IF_ERROR(StackDump(processor.stk), processor.stk);
     IF_ERROR(StackDestroyer(&processor.stk), processor.stk);
+    IF_ERROR(StackDestroyer(&processor.call_adr), processor.call_adr);
+
+    free(processor.oper_memory);
 
     printf("\033[32mPROCESSOR WORKING ENDED SUCCESSFULLY\033[0m\n");
     return 0;
