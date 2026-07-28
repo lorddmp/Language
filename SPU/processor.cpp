@@ -167,7 +167,7 @@ StackErr_t Run_Commands(str_processor* processor)
         else
         {
             StackDump(processor->stk);
-            printf("Code error: %d. Invalid command\n", ILLEGAL_COMMAND);
+            printf("Code error: %d. Invalid command %d\n", ILLEGAL_COMMAND, processor->buffer_commands[processor->ip]);
             return ILLEGAL_COMMAND;
         }
     }

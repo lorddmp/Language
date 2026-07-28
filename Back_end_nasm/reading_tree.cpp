@@ -7,47 +7,47 @@
 
 #define SAVEFILE_NAME_FRONT "Middle_end/Saved_tree_middle.txt"
 
-Node_t* Read_Node(int* position, char* massive);
+Node_t* Read_Node(int* pos_tree_array, char* tree_array);
 
-Node_t* Obrabotka_Node(int* position, char* massive);
+Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array);
 
 Node_t* Read_Tree(void)
 { 
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "r");//func get_file_size
     struct stat stat1 = {};
     int descriptor = fileno(fp);
-    int position = 0;
+    int pos_tree_array = 0;
     
     fstat(descriptor, &stat1);
 
-    char* massive = (char*)calloc((size_t)stat1.st_size + 1, sizeof(char));
-    IF_ERROR(massive);
+    char* tree_array = (char*)calloc((size_t)stat1.st_size + 1, sizeof(char));
+    IF_ERROR(tree_array);
 
-    fread(massive, sizeof(char), (size_t)stat1.st_size, fp);
+    fread(tree_array, sizeof(char), (size_t)stat1.st_size, fp);
 
-    Node_t* node = Read_Node(&position, massive);
+    Node_t* node = Read_Node(&pos_tree_array, tree_array);
     IF_ERROR(node);
 
-    free(massive);
+    free(tree_array);
     fclose(fp);
 
     return(node);
 }
 
-Node_t* Read_Node(int* position, char* massive)
+Node_t* Read_Node(int* pos_tree_array, char* tree_array)
 {
-    Skip_Spaces(position, massive);
+    Skip_Spaces(pos_tree_array, tree_array);
 
-    if (massive[*position] == '(')
+    if (tree_array[*pos_tree_array] == '(')
     {
-        Node_t* node = Obrabotka_Node(position, massive);
+        Node_t* node = Obrabotka_Node(pos_tree_array, tree_array);
         IF_ERROR(node);
         return node;
     }
 
-    if (strncmp(&massive[*position], "nil", 3) == 0)
+    if (strncmp(&tree_array[*pos_tree_array], "nil", 3) == 0)
     {
-        *position += 3;
+        *pos_tree_array += 3;
         return NULL;
     }
     else
@@ -57,7 +57,7 @@ Node_t* Read_Node(int* position, char* massive)
     }
 }
 
-Node_t* Obrabotka_Node(int* position, char* massive)
+Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array)
 {
     int skip = 0;
     double new_node_value_num = 0;
@@ -65,32 +65,32 @@ Node_t* Obrabotka_Node(int* position, char* massive)
     int new_node_value_var = 0;
 
     type_codes new_node_type = TREE_ROOT_CODE;
-    (*position)++;
+    (*pos_tree_array)++;
 
-    Skip_Spaces(position, massive);
-    sscanf(&massive[*position], "%d|%n", (int*)&new_node_type, &skip);
+    Skip_Spaces(pos_tree_array, tree_array);
+    sscanf(&tree_array[*pos_tree_array], "%d|%n", (int*)&new_node_type, &skip);
     if (skip == 0)
     {
         fprintf(stderr, "ERROR in file: %s, function: %s, line: %d", __FILE__, __func__, __LINE__);
         return NULL;
     }
 
-    (*position) += skip;
-    Skip_Spaces(position, massive);
+    (*pos_tree_array) += skip;
+    Skip_Spaces(pos_tree_array, tree_array);
 
     Node_t* node = NULL;
     switch (new_node_type)
     {
         case NUM_CODE: 
-            sscanf(&massive[*position], "%lg%n", &new_node_value_num, &skip);
+            sscanf(&tree_array[*pos_tree_array], "%lg%n", &new_node_value_num, &skip);
             node = Make_Node(new_node_type, {.num_t = new_node_value_num});
             break;
         case OPER_CODE: 
-            sscanf(&massive[*position], "%d%n", (int*)&new_node_value_op, &skip);
+            sscanf(&tree_array[*pos_tree_array], "%d%n", (int*)&new_node_value_op, &skip);
             node = Make_Node(new_node_type, {.op_code_t = new_node_value_op});
             break;
         case NAME_CODE: 
-            sscanf(&massive[*position], "%d%n", &new_node_value_var, &skip);
+            sscanf(&tree_array[*pos_tree_array], "%d%n", &new_node_value_var, &skip);
             node = Make_Node(new_node_type, {.name_ind = new_node_value_var});
             break;
         case BODY_CODE: 
@@ -108,16 +108,16 @@ Node_t* Obrabotka_Node(int* position, char* massive)
         }
     }
     
-    (*position) += skip;
+    (*pos_tree_array) += skip;
 
 
-    if ((node->left = Read_Node(position, massive)) != NULL)
+    if ((node->left = Read_Node(pos_tree_array, tree_array)) != NULL)
         node->left->parent = node;
-    if ((node->right = Read_Node(position, massive)) != NULL)
+    if ((node->right = Read_Node(pos_tree_array, tree_array)) != NULL)
         node->right->parent = node;
-    Skip_Spaces(position, massive);
+    Skip_Spaces(pos_tree_array, tree_array);
 
-    (*position)++;
+    (*pos_tree_array)++;
     return node;
 }
 

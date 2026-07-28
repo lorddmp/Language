@@ -113,13 +113,6 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
         char* mark_name = (char*)calloc(MAX_LEN_MARK_NAME, sizeof(char));
         if (sscanf(command_name, ":%s%n", mark_name, &skip) != 0)
         {
-            if (num_prohod == 2)
-            {
-                free(mark_name);
-                pos_command_array += skip;
-                continue;
-            }
-
             for (int mas_mark_ptr = 0; mas_mark_ptr < MAX_METKA_NUM; mas_mark_ptr++)
             {
                 if (mark_array[mas_mark_ptr].len == 0)
@@ -136,14 +129,18 @@ StackErr_t String_Processing(unsigned char* bytecode_array, char* command_array,
             }
 
             mark_array[mark_adr].byte = pos_bytecode_array;
+
+            if (mark_array[mark_adr].name != NULL)
+                free(mark_array[mark_adr].name);
+                
             mark_array[mark_adr].name = mark_name;
             mark_array[mark_adr].len = skip - 1;
             pos_command_array += skip;
             pos_bytecode_array--;
             continue;
         }
-        else
-            free(mark_name);
+
+        free(mark_name);
 
         if (pos_bytecode_array + (int)sizeof(data_t) >= SIZE_MASSIVE)
         {

@@ -6,11 +6,11 @@
 
 int main()
 {
-    tree_t tree = {.root_node = Read_Tree()};
+    Node_t* root_node = Read_Tree();
 
-    Converting(tree);
+    Converting(root_node);
 
-    Tree_Destructor(tree.root_node);
+    Tree_Destructor(root_node);
     printf("\033[32mBACK_END ENDED SUCCESSFULLY\033[0m\n");
     return 0;
 }
