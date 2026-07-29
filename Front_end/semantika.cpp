@@ -14,7 +14,7 @@ struct var_func_t {
 
 bool Looking_for_init(Node_t* node, var_func_t* exist_name_array);
 
-// bool Var_Func_Check(Node_t* node, var_func_t* exist_name_array);
+bool Var_Func_Check(Node_t* node, var_func_t* exist_name_array);
 
 bool Sem_analysis(Node_t* root_node, int num_name)
 {
@@ -26,7 +26,7 @@ bool Sem_analysis(Node_t* root_node, int num_name)
         return false;
     }
 
-    bool is_there_no_errors = Looking_for_init(root_node, exist_name_array);
+    bool is_there_no_errors = Looking_for_init(root_node, exist_name_array) && Var_Func_Check(root_node, exist_name_array);
 
     free(exist_name_array);
 
@@ -49,7 +49,7 @@ bool Looking_for_init(Node_t* node, var_func_t* exist_name_array)
 
     else if (node->type == NAME_CODE && exist_name_array[node->value.name_ind].existence == false)
     {
-            fprintf(stderr, "Error in semantic analysis\n");
+            fprintf(stderr, "Error in semantic analysis: a name that doesn't exist is being used.\n");
             return false;
     }
 
@@ -65,7 +65,30 @@ bool Looking_for_init(Node_t* node, var_func_t* exist_name_array)
     return true;
 }
 
-// bool Var_Func_Check(Node_t* node, var_func_t* exist_name_array)
-// {
+bool Var_Func_Check(Node_t* node, var_func_t* exist_name_array)
+{
+    if (node->type == NAME_CODE && 
+        exist_name_array[node->value.name_ind].type == 'f' && 
+        node->parent->value.op_code_t != FUNC_INIT_CODE && 
+        node->parent->value.op_code_t != FUNC_CALL_CODE)
+    {
+        fprintf(stderr, "Error in semantic analysis: the function name is not being used for its intended purpose\n");
+        return false;
+    }
 
-// }
+    else if ((node->value.op_code_t == FUNC_INIT_CODE || node->value.op_code_t == FUNC_CALL_CODE) &&
+            exist_name_array[node->left->value.name_ind].type == 'v')
+    {
+        fprintf(stderr, "Error in semantic analysis: the variable name is not being used for its intended purpose\n");
+        return false;
+    }
+
+    if (node->right != NULL)
+        IF_ERROR_SEMANT(Var_Func_Check(node->right, exist_name_array))
+
+    if (node->left != NULL)
+        IF_ERROR_SEMANT(Var_Func_Check(node->left, exist_name_array));
+
+    return true;
+
+}
