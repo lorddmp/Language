@@ -37,7 +37,6 @@ int main()
     ARRAY_DESTRUCTOR(name_array, num_name)
     free(token_array);
     Tree_Destructor(root_node);
-
     free(name_array);
     fclose(fp);
 
