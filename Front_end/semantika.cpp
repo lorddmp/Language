@@ -118,5 +118,4 @@ bool Func_in_Func_Check(Node_t* node, bool* inside_func)
         *inside_func = false;
 
     return true;
-    
 }

@@ -5,6 +5,6 @@
 
 #include <stdio.h>
 
-void Converting(Node_t* root_node);
+void Converting(Node_t* root_node, int num_name);
 
 #endif

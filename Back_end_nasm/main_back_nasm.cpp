@@ -6,9 +6,10 @@
 
 int main()
 {
-    Node_t* root_node = Read_Tree();
+    int num_name = 0;
+    Node_t* root_node = Read_Tree(&num_name);
 
-    Converting(root_node);
+    Converting(root_node, num_name);
 
     Tree_Destructor(root_node);
     printf("\033[32mBACK_END ENDED SUCCESSFULLY\033[0m\n");
