@@ -48,11 +48,19 @@ Node_t* Get_TrigLn(int* pos_token_array, Node_t** token_array);
 Node_t* Get_Func_Call(int* pos_token_array, Node_t** token_array);
 Node_t* Get_Name(int* pos_token_array, Node_t** token_array);
 
+void Set_Parent(Node_t* node, Node_t* parent_node);
+
 Node_t* Parsing(Node_t** token_array)
 {
     int pos_token_array = 0;
 
-    return Get_End(&pos_token_array, token_array);
+    Node_t* root_node = Get_End(&pos_token_array, token_array);
+
+    IF_ERROR_READING(root_node);
+
+    Set_Parent(root_node, NULL);
+
+    return root_node;
 }
 
 Node_t* Get_End(int* pos_token_array, Node_t** token_array)
@@ -386,4 +394,14 @@ Node_t* Get_Name(int* pos_token_array, Node_t** token_array)
     }
 
     return val;
+}
+
+void Set_Parent(Node_t* node, Node_t* parent_node)
+{
+    if (node->left != NULL)
+        Set_Parent(node->left, node);
+    if (node->right != NULL)
+        Set_Parent(node->right, node);
+
+    node->parent = parent_node;
 }
