@@ -2,7 +2,7 @@
 #define STRUCTS
 
 #define READ_TREE_FILE "Math_problem.txt"
-#define NUM_OPER 33
+#define NUM_OPER 34
 
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
@@ -64,6 +64,8 @@ enum oper_codes{
 
     FUNC_INIT_CODE = 32,
     FUNC_CALL_CODE = 33,
+
+    INPUT_CODE = 35,
 };
 
 struct oper_t{

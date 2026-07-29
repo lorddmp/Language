@@ -64,8 +64,13 @@ int Obrabotka_node(Node_t* node, FILE* fp)
             return 0;
         
         case VAR_INIT_CODE:
-        case EQUA_CODE:
+        case CHANGE_VAR_CODE:
             Obrabotka_node(node->right, fp);
+            fprintf(fp, "POP REG%dX\n", node->left->value.name_ind);
+            return 0;
+
+        case INPUT_CODE:
+            fprintf(fp, "IN\n");
             fprintf(fp, "POP REG%dX\n", node->left->value.name_ind);
             return 0;
 

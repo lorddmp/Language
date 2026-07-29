@@ -32,7 +32,8 @@ Node_t* Get_Decl(int* pos_token_array, Node_t** token_array);
 
 Node_t* Get_Func_Init(int* pos_token_array, Node_t** token_array);
 Node_t* Get_Var_Init(int* pos_token_array, Node_t** token_array);
-Node_t* Get_Equat(int* pos_token_array, Node_t** token_array);
+Node_t* Get_Var_Change(int* pos_token_array, Node_t** token_array);
+Node_t* Get_Input(int* pos_token_array, Node_t** token_array);
 Node_t* Get_Expr(int* pos_token_array, Node_t** token_array);
 Node_t* Get_If_While(int* pos_token_array, Node_t** token_array);
 Node_t* Get_Printf(int* pos_token_array, Node_t** token_array);
@@ -113,11 +114,12 @@ Node_t* Get_Decl(int* pos_token_array, Node_t** token_array)
     Node_t* val = NULL;
     if ((val = Get_Func_Init(pos_token_array, token_array)) == NULL)
         if ((val = Get_Var_Init(pos_token_array, token_array)) == NULL)
-            if ((val = Get_Equat(pos_token_array, token_array)) == NULL)
-                if ((val = Get_Expr(pos_token_array, token_array)) == NULL)
-                    if ((val = Get_If_While(pos_token_array, token_array)) == NULL)
-                        if ((val = Get_Printf(pos_token_array, token_array)) == NULL)
-                            return NULL;
+            if ((val = Get_Var_Change(pos_token_array, token_array)) == NULL)
+                if ((val = Get_Input(pos_token_array, token_array)) == NULL)
+                    if ((val = Get_Expr(pos_token_array, token_array)) == NULL)
+                        if ((val = Get_If_While(pos_token_array, token_array)) == NULL)
+                            if ((val = Get_Printf(pos_token_array, token_array)) == NULL)
+                                return NULL;
 
     ERROR_IF_NODE_WRONG(SEMICOLONE_CODE, __FILE__, __func__, __LINE__)
     
@@ -166,9 +168,9 @@ Node_t* Get_Var_Init(int* pos_token_array, Node_t** token_array)
     return val;
 }
 
-Node_t* Get_Equat(int* pos_token_array, Node_t** token_array)
+Node_t* Get_Var_Change(int* pos_token_array, Node_t** token_array)
 {
-    // printf("Get_Equat\n");
+    // printf("Get_Var_Change\n");
     NULL_IF_NODE_WRONG(CHANGE_VAR_CODE)
 
     (*pos_token_array)++;
@@ -182,9 +184,21 @@ Node_t* Get_Equat(int* pos_token_array, Node_t** token_array)
     if (val2 == NULL)
         ERROR(__FILE__, __func__, __LINE__)
 
-    val = Make_Node(OPER_CODE, {.op_code_t = EQUA_CODE}, val, val2);
+    val = Make_Node(OPER_CODE, {.op_code_t = CHANGE_VAR_CODE}, val, val2);
     return val;
+}
 
+Node_t* Get_Input(int* pos_token_array, Node_t** token_array)
+{
+    // printf("Get_Var_Change\n");
+    NULL_IF_NODE_WRONG(INPUT_CODE)
+    (*pos_token_array)++;
+
+    Node_t* val = Get_Paren(pos_token_array, token_array);
+    IF_ERROR_READING(val)
+
+    val = Make_Node(OPER_CODE, {.op_code_t = INPUT_CODE}, val, NULL);
+    return val;
 }
 
 Node_t* Get_Expr(int* pos_token_array, Node_t** token_array)
@@ -324,8 +338,8 @@ Node_t* Get_Fig_Paren(int* pos_token_array, Node_t** token_array)
 {
     // printf("Get_Fig_Paren\n");
     NULL_IF_NODE_WRONG(OPEN_FIG_BRAC_CODE)
-        
     (*pos_token_array)++;
+
     Node_t* val = Get_Tree(pos_token_array, token_array);
     IF_ERROR_READING(val)
 

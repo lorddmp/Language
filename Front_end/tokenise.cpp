@@ -41,11 +41,13 @@ oper_t oper_array[NUM_OPER] = {
     {"=",               EQUA_CODE,              1},
     {"переменночка",    VAR_INIT_CODE,          24},
     {"тепереча",        CHANGE_VAR_CODE,        16},
+    
     {";",               SEMICOLONE_CODE,        1},
 
     {"ежели",           IF_CODE,                10},
     {"покудова",        WHILE_CODE,             16},
     {"напечатай",       PRINTF_CODE,            18},
+    {"ввод",            INPUT_CODE,             8},
 
     {"функция",         FUNC_INIT_CODE,         14},
     {"вызови",          FUNC_CALL_CODE,         12},
