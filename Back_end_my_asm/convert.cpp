@@ -34,38 +34,38 @@ str log_codes[LOG_FUNCS] = {
     {LESS_OR_EQ_CODE,   "JAE"},
 };
 
-int Obrabotka_node(Node_t* node, FILE* fp);
+int Node_Processing(Node_t* node, FILE* fp);
 
 void Converting(Node_t* root_node)
 {
     FILE* fp = fopen("Back_end_my_asm/Commands.txt", "w"); 
 
-    Obrabotka_node(root_node, fp);
+    Node_Processing(root_node, fp);
 
     fprintf(fp, "HLT");
 
     fclose(fp);
 }
 
-int Obrabotka_node(Node_t* node, FILE* fp)
+int Node_Processing(Node_t* node, FILE* fp)
 {
     // printf("NODE: type = %d, left = %p, right = %p\n", node->type, node->left, node->right);
     if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
-        Obrabotka_node(node->right, fp);
+        Node_Processing(node->right, fp);
 
     switch (node->value.op_code_t)
     {
         case FUNC_INIT_CODE:
             fprintf(fp, "JMP :%p\n", node);
             fprintf(fp, ":%d\n", node->left->value.name_ind);
-            Obrabotka_node(node->right, fp);
+            Node_Processing(node->right, fp);
             fprintf(fp, "RET\n");
             fprintf(fp, ":%p\n", node);
             return 0;
         
         case VAR_INIT_CODE:
         case CHANGE_VAR_CODE:
-            Obrabotka_node(node->right, fp);
+            Node_Processing(node->right, fp);
             fprintf(fp, "POP REG%dX\n", node->left->value.name_ind);
             return 0;
 
@@ -79,25 +79,25 @@ int Obrabotka_node(Node_t* node, FILE* fp)
             return 0;
 
         case IF_CODE:
-            Obrabotka_node(node->left, fp);
+            Node_Processing(node->left, fp);
             fprintf(fp, "PUSH 0\n");
             fprintf(fp, "JE :%p\n", node);
-            Obrabotka_node(node->right, fp);
+            Node_Processing(node->right, fp);
             fprintf(fp, ":%p\n", node);
             return 0;
 
         case WHILE_CODE:
             fprintf(fp, ":%p\n", node->left);
-            Obrabotka_node(node->left, fp);
+            Node_Processing(node->left, fp);
             fprintf(fp, "PUSH 0\n");
             fprintf(fp, "JE :%p\n", node);
-            Obrabotka_node(node->right, fp);
+            Node_Processing(node->right, fp);
             fprintf(fp, "JMP :%p\n", node->left);
             fprintf(fp, ":%p\n", node);
             return 0;
         
         case PRINTF_CODE:
-            Obrabotka_node(node->left, fp);
+            Node_Processing(node->left, fp);
             fprintf(fp, "POP\n");
             return 0;
 
@@ -106,9 +106,9 @@ int Obrabotka_node(Node_t* node, FILE* fp)
     }
 
     if (node->left != NULL)
-        Obrabotka_node(node->left, fp);
+        Node_Processing(node->left, fp);
     if (node->right != NULL && (node->type != BODY_CODE && node->type != TREE_ROOT_CODE))
-        Obrabotka_node(node->right, fp);
+        Node_Processing(node->right, fp);
 
     if (node->type == NUM_CODE)
     {

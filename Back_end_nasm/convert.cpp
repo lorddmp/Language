@@ -14,7 +14,7 @@ void Set_Scope_Array(Node_t* node, var_info* name_array, bool* inside_func);
 void Set_Data(var_info* name_array, int num_name, FILE* fp);
 
 int Free_Reg_Search(bool* reg_free_array);
-int Obrabotka_node(Node_t* node, bool* reg_free_array, var_info* name_array, FILE* fp);
+int Node_Processing(Node_t* node, bool* reg_free_array, var_info* name_array, FILE* fp);
 
 void Converting(Node_t* root_node, int num_name)
 {
@@ -86,8 +86,8 @@ int Free_Reg_Search(bool* reg_free_array)
     return -1;
 }
 
-int Obrabotka_node(Node_t* node, bool* reg_free_array, var_info* name_array, FILE* fp)
+int Node_Processing(Node_t* node, bool* reg_free_array, var_info* name_array, FILE* fp)
 {
     if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
-        Obrabotka_node(node->right, reg_free_array, name_array, fp);
+        Node_Processing(node->right, reg_free_array, name_array, fp);
 }
