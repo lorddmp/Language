@@ -3,6 +3,6 @@
 
 #include "structs_defines_types.h"
 
-Node_t* Read_Tree(int* num_name);
+Node_t* Read_Tree(int* num_name, int* num_const_num);
 
 #endif

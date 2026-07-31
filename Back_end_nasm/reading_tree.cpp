@@ -7,11 +7,11 @@
 
 #define SAVEFILE_NAME_FRONT "Middle_end/Saved_tree_middle.txt"
 
-Node_t* Read_Node(int* pos_tree_array, char* tree_array, int* num_name);
+Node_t* Read_Node(int* pos_tree_array, char* tree_array, int* num_name, int* num_const_num);
 
-Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name);
+Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name, int* num_const_num);
 
-Node_t* Read_Tree(int* num_name)
+Node_t* Read_Tree(int* num_name, int* num_const_num)
 { 
     FILE* fp = fopen(SAVEFILE_NAME_FRONT, "r");//func get_file_size
     struct stat stat1 = {};
@@ -25,7 +25,7 @@ Node_t* Read_Tree(int* num_name)
 
     fread(tree_array, sizeof(char), (size_t)stat1.st_size, fp);
 
-    Node_t* node = Read_Node(&pos_tree_array, tree_array, num_name);
+    Node_t* node = Read_Node(&pos_tree_array, tree_array, num_name, num_const_num);
     IF_ERROR(node);
 
     free(tree_array);
@@ -34,13 +34,13 @@ Node_t* Read_Tree(int* num_name)
     return(node);
 }
 
-Node_t* Read_Node(int* pos_tree_array, char* tree_array, int* num_name)
+Node_t* Read_Node(int* pos_tree_array, char* tree_array, int* num_name, int* num_const_num)
 {
     Skip_Spaces(pos_tree_array, tree_array);
 
     if (tree_array[*pos_tree_array] == '(')
     {
-        Node_t* node = Obrabotka_Node(pos_tree_array, tree_array, num_name);
+        Node_t* node = Obrabotka_Node(pos_tree_array, tree_array, num_name, num_const_num);
         IF_ERROR(node);
         return node;
     }
@@ -57,7 +57,7 @@ Node_t* Read_Node(int* pos_tree_array, char* tree_array, int* num_name)
     }
 }
 
-Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name)
+Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name, int* num_const_num)
 {
     int skip = 0;
     double new_node_value_num = 0;
@@ -84,6 +84,7 @@ Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name)
         case NUM_CODE: 
             sscanf(&tree_array[*pos_tree_array], "%lg%n", &new_node_value_num, &skip);
             node = Make_Node(new_node_type, {.num_t = new_node_value_num});
+            (*num_const_num)++;
             break;
         case OPER_CODE: 
             sscanf(&tree_array[*pos_tree_array], "%d%n", (int*)&new_node_value_op, &skip);
@@ -115,9 +116,9 @@ Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array, int* num_name)
     (*pos_tree_array) += skip;
 
 
-    if ((node->left = Read_Node(pos_tree_array, tree_array, num_name)) != NULL)
+    if ((node->left = Read_Node(pos_tree_array, tree_array, num_name, num_const_num)) != NULL)
         node->left->parent = node;
-    if ((node->right = Read_Node(pos_tree_array, tree_array, num_name)) != NULL)
+    if ((node->right = Read_Node(pos_tree_array, tree_array, num_name, num_const_num)) != NULL)
         node->right->parent = node;
     Skip_Spaces(pos_tree_array, tree_array);
 
