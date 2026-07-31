@@ -7,6 +7,12 @@ typedef double data_t;
 #define READ_TREE_FILE "Math_problem.txt"
 #define NUM_OPER 34
 
+#define ERROR(filename, funcname, line)                                                             \
+{                                                                                                   \
+    fprintf(stderr, "Error in file: %s, function: %s, line: %d\n", filename, funcname, line);       \
+    return NULL;                                                                                    \
+}
+
 #define IF_ERROR(arg)                                                                                   \
 do {                                                                                                    \
     if (arg == NULL)                                                                                    \
@@ -15,6 +21,7 @@ do {                                                                            
         return NULL;                                                                                    \
     }                                                                                                   \
 } while (0)
+
 
 #define ARRAY_DESTRUCTOR(array, num_elem)                       \
 for (int pos_array = 0; pos_array < num_elem; pos_array++)      \

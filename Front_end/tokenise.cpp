@@ -53,12 +53,6 @@ oper_t oper_array[NUM_OPER] = {
     {"вызови",          FUNC_CALL_CODE,         12},
 };
 
-#define ERROR(filename, funcname, line)                                                             \
-{                                                                                                   \
-    fprintf(stderr, "Error in file: %s, function: %s, line: %d", filename, funcname, line);         \
-    return NULL;                                                                                    \
-}                                                                                                   \
-
 Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* num_token)
 {
     FILE* fp = fopen(READ_TREE_FILE, "r");

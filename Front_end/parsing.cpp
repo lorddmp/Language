@@ -8,12 +8,6 @@
 #include <string.h>
 #include <math.h>
 
-#define ERROR(filename, funcname, line)                                                             \
-{                                                                                                   \
-    fprintf(stderr, "Error in file: %s, function: %s, line: %d\n", filename, funcname, line);       \
-    return NULL;                                                                                    \
-}
-
 #define IF_ERROR_READING(a)                                 \
 if (a == NULL)                                              \
     return NULL;                                            \
