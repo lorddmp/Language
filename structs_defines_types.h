@@ -1,6 +1,9 @@
 #ifndef STRUCTS
 #define STRUCTS
 
+typedef double data_t;
+#define SPEC "%lg"
+
 #define READ_TREE_FILE "Math_problem.txt"
 #define NUM_OPER 34
 
@@ -78,7 +81,7 @@ union value_dif
 {
     oper_codes op_code_t;
     int name_ind;
-    double num_t;
+    data_t num_t;
 };
 
 struct Node_t {

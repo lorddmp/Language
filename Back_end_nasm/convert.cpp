@@ -2,7 +2,7 @@
 
 #include <stdlib.h>
 
-#define NUM_REGS 16
+#define NUM_AVAILABLE_REGS 15
 
 struct var_info {
     char scope;
@@ -10,7 +10,7 @@ struct var_info {
     int func;
 };
 
-void Set_Scope_Array(Node_t* node, var_info* name_array, bool* inside_func);
+void Set_Scope_Array(Node_t* node, var_info* name_array, int* func_ind);
 void Set_Data(var_info* name_array, int num_name, FILE* fp);
 
 int Free_Reg_Search(bool* reg_free_array);
@@ -20,15 +20,18 @@ void Converting(Node_t* root_node, int num_name)
 {
     FILE* fp = fopen("Back_end_nasm/Commands.asm", "w");
 
-    bool inside_func = false;
+    int func_ind = -1;
     var_info* name_array = (var_info*)calloc((size_t)num_name, sizeof(var_info));
 
-    Set_Scope_Array(root_node, name_array, &inside_func);
+    Set_Scope_Array(root_node, name_array, &func_ind);
     Set_Data(name_array, num_name, fp);
 
     fprintf(fp, "section .text\n\n");
+    fprintf(fp, "_Start:\n\n");
 
-    bool* reg_free_array = (bool*)calloc(NUM_REGS, sizeof(bool));
+    bool* reg_free_array = (bool*)calloc(NUM_AVAILABLE_REGS, sizeof(bool));
+
+    Node_Processing(root_node, reg_free_array, name_array, fp);
 
     // for (int i = 0; i < num_name; i++)
     //     putchar(name_array[i]);
@@ -40,28 +43,30 @@ void Converting(Node_t* root_node, int num_name)
     fclose(fp);
 }
 
-void Set_Scope_Array(Node_t* node, var_info* name_array, bool* inside_func)
+void Set_Scope_Array(Node_t* node, var_info* name_array, int* func_ind)
 {
     if (node->value.op_code_t == FUNC_INIT_CODE)
-        *inside_func = true;
+        *func_ind = node->left->value.name_ind;
 
     else if (node->type == NAME_CODE && node->parent->value.op_code_t != FUNC_INIT_CODE && node->parent->value.op_code_t != FUNC_CALL_CODE)
     {
-        if (*inside_func == true)
-            name_array[node->value.name_ind].scope = 'l'; //local
+        if (*func_ind == -1)
+            name_array[node->value.name_ind].scope = 'g'; //global var
         else
-            name_array[node->value.name_ind].scope = 'g'; //global
-
+        {
+            name_array[node->value.name_ind].func = *func_ind;
+            name_array[node->value.name_ind].scope = 'l'; //local var
+        }
     }
 
     if (node->left != NULL)
-        Set_Scope_Array(node->left, name_array, inside_func);
+        Set_Scope_Array(node->left, name_array, func_ind);
 
     if (node->right != NULL)
-        Set_Scope_Array(node->right, name_array, inside_func);
+        Set_Scope_Array(node->right, name_array, func_ind);
 
     if (node->value.op_code_t == FUNC_INIT_CODE)
-        *inside_func = false;
+        *func_ind = -1;
 }
 
 void Set_Data(var_info* name_array, int num_name, FILE* fp)
@@ -77,7 +82,7 @@ void Set_Data(var_info* name_array, int num_name, FILE* fp)
 
 int Free_Reg_Search(bool* reg_free_array)
 {
-    for (int i = 0; i < NUM_REGS; i++)
+    for (int i = 0; i < NUM_AVAILABLE_REGS; i++)
     {
         if (reg_free_array[i] == true)
             return i;
@@ -90,4 +95,30 @@ int Node_Processing(Node_t* node, bool* reg_free_array, var_info* name_array, FI
 {
     if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
         Node_Processing(node->right, reg_free_array, name_array, fp);
+
+    switch (node->value.op_code_t)
+    {
+        case FUNC_INIT_CODE:
+            fprintf(fp, "JMP .%p\n", node);
+            fprintf(fp, ".func%d:\n", node->left->value.name_ind);
+            Node_Processing(node->right, reg_free_array, name_array, fp);
+            fprintf(fp, "RET\n");
+            fprintf(fp, ".%p:\n", node);
+            return 0;
+
+        case FUNC_CALL_CODE:
+            fprintf(fp, "CALL .func%d\n", node->left->value.name_ind);
+            return 0;
+
+        default:
+            break;
+    }
+
+    if (node->left != NULL)
+        Node_Processing(node->left, reg_free_array, name_array, fp);
+    
+    if (node->right != NULL && (node->type != BODY_CODE && node->type != TREE_ROOT_CODE))
+        Node_Processing(node->right, reg_free_array, name_array, fp);
+
+    return 0;
 }

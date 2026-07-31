@@ -8,7 +8,7 @@
 #define NUM_MATH_AND_LOG_OPER 20
 
 struct functions{
-    double(*funcname)(Node_t* node, errors* err);
+    data_t(*funcname)(Node_t* node, errors* err);
     enum oper_codes func_code;
 };
 
@@ -35,7 +35,7 @@ functions mas_functions[NUM_MATH_AND_LOG_OPER] = {
     {LESS_OR_EQ_CASE, LESS_OR_EQ_CODE},
 };
 
-double Calculate(Node_t* node, errors* err)
+data_t Calculate(Node_t* node, errors* err)
 {
     if (node == NULL)
         return 0;
@@ -45,8 +45,8 @@ double Calculate(Node_t* node, errors* err)
         return NAN;
     else
     {
-        double a = Calculate(node->left, err);
-        double b = Calculate(node->right, err);
+        data_t a = Calculate(node->left, err);
+        data_t b = Calculate(node->right, err);
         if (isnan(a) || isnan(b))
             return NAN;
         
@@ -54,7 +54,7 @@ double Calculate(Node_t* node, errors* err)
         {
             if (mas_functions[i].func_code == node->value.op_code_t)
             {
-                double c = mas_functions[i].funcname(node, err);
+                data_t c = mas_functions[i].funcname(node, err);
                 if (node->left != NULL)
                 {
                     Tree_Destructor(node->left);

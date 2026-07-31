@@ -70,7 +70,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
 
     char name[MAX_LEN_OF_NAME] = {};
 
-    double num = 0;
+    data_t num = 0;
     int skip = 0;
 
     struct stat stat1 = {};
@@ -118,7 +118,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
         if (found)
             continue;
 
-        else if (sscanf(&code_array[pos_code], "%lg%n", &num, &skip) != 0)
+        else if (sscanf(&code_array[pos_code], SPEC "%n", &num, &skip) != 0)
         {
             token_array[pos_tokens] = Make_Node(NUM_CODE, {.num_t = num});
             pos_code += skip;

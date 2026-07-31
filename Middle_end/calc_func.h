@@ -2,25 +2,25 @@
 #define CALC_FUNCS
 #include "structs_defines_types.h"
 
-double ADD_CASE(Node_t* node, errors* err);
-double SUB_CASE(Node_t* node, errors* err);
-double MUL_CASE(Node_t* node, errors* err);
-double DIV_CASE(Node_t* node, errors* err);
-double STEPEN_CASE(Node_t* node, errors* err);
-double SIN_CASE(Node_t* node, errors* err);
-double COS_CASE(Node_t* node, errors* err);
-double TAN_CASE(Node_t* node, errors* err);
-double COTAN_CASE(Node_t* node, errors* err);
-double ARCSIN_CASE(Node_t* node, errors* err);
-double ARCCOS_CASE(Node_t* node, errors* err);
-double ARCTAN_CASE(Node_t* node, errors* err);
-double ARCCOTAN_CASE(Node_t* node, errors* err);
-double LN_CASE(Node_t* node, errors* err);
-double DOUBLE_EQ_CASE(Node_t* node, errors* err);
-double NOT_EQ_CASE(Node_t* node, errors* err);
-double MORE_CASE(Node_t* node, errors* err);
-double MORE_OR_EQ_CASE(Node_t* node, errors* err);
-double LESS_CASE(Node_t* node, errors* err);
-double LESS_OR_EQ_CASE(Node_t* node, errors* err);
+data_t ADD_CASE(Node_t* node, errors* err);
+data_t SUB_CASE(Node_t* node, errors* err);
+data_t MUL_CASE(Node_t* node, errors* err);
+data_t DIV_CASE(Node_t* node, errors* err);
+data_t STEPEN_CASE(Node_t* node, errors* err);
+data_t SIN_CASE(Node_t* node, errors* err);
+data_t COS_CASE(Node_t* node, errors* err);
+data_t TAN_CASE(Node_t* node, errors* err);
+data_t COTAN_CASE(Node_t* node, errors* err);
+data_t ARCSIN_CASE(Node_t* node, errors* err);
+data_t ARCCOS_CASE(Node_t* node, errors* err);
+data_t ARCTAN_CASE(Node_t* node, errors* err);
+data_t ARCCOTAN_CASE(Node_t* node, errors* err);
+data_t LN_CASE(Node_t* node, errors* err);
+data_t DOUBLE_EQ_CASE(Node_t* node, errors* err);
+data_t NOT_EQ_CASE(Node_t* node, errors* err);
+data_t MORE_CASE(Node_t* node, errors* err);
+data_t MORE_OR_EQ_CASE(Node_t* node, errors* err);
+data_t LESS_CASE(Node_t* node, errors* err);
+data_t LESS_OR_EQ_CASE(Node_t* node, errors* err);
 
 #endif

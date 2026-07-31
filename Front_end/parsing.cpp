@@ -113,13 +113,14 @@ Node_t* Get_Decl(int* pos_token_array, Node_t** token_array)
 
     Node_t* val = NULL;
     if ((val = Get_Func_Init(pos_token_array, token_array)) == NULL)
-        if ((val = Get_Var_Init(pos_token_array, token_array)) == NULL)
-            if ((val = Get_Var_Change(pos_token_array, token_array)) == NULL)
-                if ((val = Get_Input(pos_token_array, token_array)) == NULL)
-                    if ((val = Get_Expr(pos_token_array, token_array)) == NULL)
-                        if ((val = Get_If_While(pos_token_array, token_array)) == NULL)
-                            if ((val = Get_Printf(pos_token_array, token_array)) == NULL)
-                                return NULL;
+        if ((val = Get_Func_Call(pos_token_array, token_array)) == NULL)
+            if ((val = Get_Var_Init(pos_token_array, token_array)) == NULL)
+                if ((val = Get_Var_Change(pos_token_array, token_array)) == NULL)
+                    if ((val = Get_Input(pos_token_array, token_array)) == NULL)
+                        if ((val = Get_Expr(pos_token_array, token_array)) == NULL)
+                            if ((val = Get_If_While(pos_token_array, token_array)) == NULL)
+                                if ((val = Get_Printf(pos_token_array, token_array)) == NULL)
+                                    return NULL;
 
     ERROR_IF_NODE_WRONG(SEMICOLONE_CODE, __FILE__, __func__, __LINE__)
     
@@ -312,9 +313,8 @@ Node_t* Get_Object(int* pos_token_array, Node_t** token_array)
     if ((val = Get_Paren(pos_token_array, token_array)) == NULL)
         if ((val = Get_Num(pos_token_array, token_array)) == NULL)
             if ((val = Get_TrigLn(pos_token_array, token_array)) == NULL)
-                if ((val = Get_Func_Call(pos_token_array, token_array)) == NULL)
-                    if ((val = Get_Name(pos_token_array, token_array)) == NULL)
-                        return NULL;
+                if ((val = Get_Name(pos_token_array, token_array)) == NULL)
+                    return NULL;
 
     return val;
 }

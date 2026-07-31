@@ -11,7 +11,7 @@ void Save_Tree(Node_t* node, FILE* fp)
     switch (node->type)
     {
         case NUM_CODE: 
-            fprintf(fp, "%lg ", node->value.num_t);
+            fprintf(fp, SPEC " ", node->value.num_t);
             break;
         case OPER_CODE: 
             fprintf(fp, "%d ", node->value.op_code_t);
@@ -55,7 +55,7 @@ void Print_Node(Node_t* node, FILE* fp)
     else if (node->type == TREE_ROOT_CODE)
         fprintf(fp, "node%p [shape = record, color = black, label=\"{type: tree_root | value: %d|{<f0> %p| <f1> %p}}\"];\n", node, node->value.name_ind, node->left, node->right);
     else
-        fprintf(fp, "node%p [shape = record, color = red, label=\"{type: number | value: %lg|{<f0> %p| <f1> %p}}\"];\n", node, node->value.num_t, node->left, node->right);
+        fprintf(fp, "node%p [shape = record, color = red, label=\"{type: number | value: " SPEC "|{<f0> %p| <f1> %p}}\"];\n", node, node->value.num_t, node->left, node->right);
 
     if (node->left != NULL)
     {

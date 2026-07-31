@@ -112,7 +112,7 @@ int Node_Processing(Node_t* node, FILE* fp)
 
     if (node->type == NUM_CODE)
     {
-        fprintf(fp, "PUSH %lg\n", node->value.num_t);
+        fprintf(fp, "PUSH " SPEC "\n", node->value.num_t);
         return 0;
     }
 

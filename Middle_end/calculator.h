@@ -3,6 +3,6 @@
 
 #include "structs_defines_types.h"
 
-double Calculate(Node_t* node, errors* err);
+data_t Calculate(Node_t* node, errors* err);
 
 #endif

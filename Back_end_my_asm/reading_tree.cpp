@@ -60,7 +60,7 @@ Node_t* Read_Node(int* pos_tree_array, char* tree_array)
 Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array)
 {
     int skip = 0;
-    double new_node_value_num = 0;
+    data_t new_node_value_num = 0;
     oper_codes new_node_value_op = END_CODE;
     int new_node_value_var = 0;
 
@@ -82,7 +82,7 @@ Node_t* Obrabotka_Node(int* pos_tree_array, char* tree_array)
     switch (new_node_type)
     {
         case NUM_CODE: 
-            sscanf(&tree_array[*pos_tree_array], "%lg%n", &new_node_value_num, &skip);
+            sscanf(&tree_array[*pos_tree_array], SPEC "%n", &new_node_value_num, &skip);
             node = Make_Node(new_node_type, {.num_t = new_node_value_num});
             break;
         case OPER_CODE: 
