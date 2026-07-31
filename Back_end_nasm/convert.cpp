@@ -18,8 +18,8 @@ struct num_info {
 
 void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array);
 
-void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call);
-void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array);
+void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call, Node_t* first_func);
+void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_t* first_func);
 
 void Set_Data(var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp);
 
@@ -63,7 +63,7 @@ void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, nu
     {
         *inside_func = true;
         name_array[node->left->value.name_ind].func_adress = node->right;
-        Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, false);
+        Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, false, node->right);
     }
 
     else if (node->type == NAME_CODE && node->parent->value.op_code_t != FUNC_INIT_CODE && node->parent->value.op_code_t != FUNC_CALL_CODE)
@@ -88,47 +88,47 @@ void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, nu
         (*free_index_num_array)++;
     }
 
-    if (node->left != NULL)
-        Set_Var_Num_Array(node->left, name_array, inside_func, num_array, free_index_num_array, reg_busy_array);
-
     if (node->right != NULL)
         Set_Var_Num_Array(node->right, name_array, inside_func, num_array, free_index_num_array, reg_busy_array);
 
+    if (node->left != NULL)
+        Set_Var_Num_Array(node->left, name_array, inside_func, num_array, free_index_num_array, reg_busy_array);
+
     if (node->value.op_code_t == FUNC_INIT_CODE)
     {
-        Unlock_Regs(node->right, reg_busy_array, name_array);
+        Unlock_Regs(node->right, reg_busy_array, name_array, node->right);
         *inside_func = false;
     }
 }
 
-void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call)
+void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call, Node_t* first_func)
 {
-    if (node->value.op_code_t == FUNC_CALL_CODE)
-        Ban_Regs_From_Calls(name_array[node->left->value.name_ind].func_adress, reg_busy_array, name_array, true);
+    if (node->value.op_code_t == FUNC_CALL_CODE && (!inside_call || (inside_call && name_array[node->left->value.name_ind].func_adress != first_func))) //to avoid looping
+        Ban_Regs_From_Calls(name_array[node->left->value.name_ind].func_adress, reg_busy_array, name_array, true, first_func);
     
     else if (node->value.op_code_t == VAR_INIT_CODE && inside_call)
         reg_busy_array[name_array[node->left->value.name_ind].reg] = true;
 
     if (node->left != NULL)
-        Ban_Regs_From_Calls(node->left, reg_busy_array, name_array, inside_call);
+        Ban_Regs_From_Calls(node->left, reg_busy_array, name_array, inside_call, first_func);
 
     if (node->right != NULL)
-        Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, inside_call);
+        Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, inside_call, first_func);
 }
 
-void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array)
+void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_t* first_func)
 {
-    if (node->value.op_code_t == FUNC_CALL_CODE)
-        Unlock_Regs(name_array[node->left->value.name_ind].func_adress, reg_busy_array, name_array);
+    if (node->value.op_code_t == FUNC_CALL_CODE && name_array[node->left->value.name_ind].func_adress != first_func) //to avoid looping
+        Unlock_Regs(name_array[node->left->value.name_ind].func_adress, reg_busy_array, name_array, first_func);
     
     else if (node->value.op_code_t == VAR_INIT_CODE)
         reg_busy_array[name_array[node->left->value.name_ind].reg] = false;
 
     if (node->left != NULL)
-        Unlock_Regs(node->left, reg_busy_array, name_array);
+        Unlock_Regs(node->left, reg_busy_array, name_array, first_func);
 
     if (node->right != NULL)
-        Unlock_Regs(node->right, reg_busy_array, name_array);
+        Unlock_Regs(node->right, reg_busy_array, name_array, first_func);
 }
 
 void Set_Data(var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp)
