@@ -15,6 +15,7 @@ if (node->parent->type == OPER_CODE)            \
 }                                               \
 
 #define MATH_FUNCS(operation)                                                                \
+{                                                                                            \
     Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);         \
     Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);        \
     fprintf(fp, "movsd xmm15, [rsp]\n");                                                     \
@@ -22,9 +23,11 @@ if (node->parent->type == OPER_CODE)            \
     fprintf(fp, "movsd xmm14, [rsp]\n");                                                     \
     fprintf(fp, "%s xmm14, xmm15\n", operation);                                             \
     fprintf(fp, "movsd [rsp], xmm14\n");                                                     \
-    return 0;                                                                                
+    return 0;                                                                                \
+}
                                                                                              
 #define LOG_FUNCS(operation)                                                                 \
+{                                                                                            \
     Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);         \
     Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);        \
     fprintf(fp, "movsd xmm15, [rsp]\n");                                                     \
@@ -37,7 +40,8 @@ if (node->parent->type == OPER_CODE)            \
     fprintf(fp, "_mark%p:", node);                                                           \
     fprintf(fp, "sub rsp, 8\n");                                                             \
     fprintf(fp, "movsd [rsp], xmm14");                                                       \
-    return 0;                                                                                
+    return 0;                                                                                \
+}
 
 struct var_info {
     char scope;
@@ -158,6 +162,7 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
                 fprintf(fp, "je _mark%p\n", node);
                 Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
                 fprintf(fp, "_mark%p:\n", node);
+                return 0;
 
             case WHILE_CODE:
                 fprintf(fp, "_mark%p:\n", node->left);
@@ -170,26 +175,19 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
                 Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
                 fprintf(fp, "jmp _mark%p\n", node->left);
                 fprintf(fp, "_mark%p:\n", node);
+                return 0;
 
             default:
                 break;
         }
 
         for (int i = 0; i < NUM_MATH_FUNCS; i++)
-        {
             if (node->value.op_code_t == math_codes[i].op_code)
-            {
                 MATH_FUNCS(math_codes[i].cmd_name)
-            }
-        }
 
         for (int i = 0; i < NUM_LOG_FUNCS; i++)
-        {
             if (node->value.op_code_t == log_codes[i].op_code)
-            {
                 MATH_FUNCS(log_codes[i].cmd_name)
-            }
-        }
     }
 
     if (node->type == NUM_CODE)
