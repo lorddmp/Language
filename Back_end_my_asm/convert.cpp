@@ -28,10 +28,10 @@ str math_codes[MATH_FUNCS] = {
 str log_codes[LOG_FUNCS] = {
     {DOUBLE_EQ_CODE,    "JE"},
     {NOT_EQ_CODE,       "JNE"},
-    {MORE_CODE,         "JB"},
-    {MORE_OR_EQ_CODE,   "JBE"},
-    {LESS_CODE,         "JA"},
-    {LESS_OR_EQ_CODE,   "JAE"},
+    {MORE_CODE,         "JA"},
+    {MORE_OR_EQ_CODE,   "JAE"},
+    {LESS_CODE,         "JB"},
+    {LESS_OR_EQ_CODE,   "JBE"},
 };
 
 int Node_Processing(Node_t* node, FILE* fp);

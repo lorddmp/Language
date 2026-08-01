@@ -196,7 +196,7 @@ StackErr_t funcname(str_processor* processor)                               \
 }
   
 GEN_ARIPHMETIC(ADD_CASE, +)
-GEN_ARIPHMETIC(SUB_CASE, -) 
+GEN_ARIPHMETIC(SUB_CASE, -)
 GEN_ARIPHMETIC(MUL_CASE, *) 
 
 #undef GEN_ARIPHMETIC
@@ -328,7 +328,7 @@ StackErr_t funcname(str_processor* processor)                                   
     data_t value_j2 = StackPop(&processor->stk, &err);                                  \
     IF_ERROR(err, processor->stk)                                                       \
                                                                                         \
-    if (value_j1 sign value_j2)                                                         \
+    if (value_j2 sign value_j1)                                                         \
         processor->ip = *(int*)(&processor->buffer_commands[processor->ip + 1]) - 1;    \
     else                                                                                \
         processor->ip += (int)sizeof(int);                                              \

@@ -4,6 +4,40 @@
 #include <tech_func.h>
 
 #define NUM_AVAILABLE_REGS 14
+#define NUM_MATH_FUNCS 4
+#define NUM_LOG_FUNCS 6
+
+#define PUSH_IF_NEED(node)                      \
+if (node->parent->type == OPER_CODE)            \
+{                                               \
+    fprintf(fp, "sub rsp, 8\n");                \
+    fprintf(fp, "movsd [rsp], xmm14");          \
+}                                               \
+
+#define MATH_FUNCS(operation)                                                                \
+    Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);         \
+    Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);        \
+    fprintf(fp, "movsd xmm15, [rsp]\n");                                                     \
+    fprintf(fp, "add rsp, 8\n");                                                             \
+    fprintf(fp, "movsd xmm14, [rsp]\n");                                                     \
+    fprintf(fp, "%s xmm14, xmm15\n", operation);                                             \
+    fprintf(fp, "movsd [rsp], xmm14\n");                                                     \
+    return 0;                                                                                
+                                                                                             
+#define LOG_FUNCS(operation)                                                                 \
+    Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);         \
+    Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);        \
+    fprintf(fp, "movsd xmm15, [rsp]\n");                                                     \
+    fprintf(fp, "add rsp, 8\n");                                                             \
+    fprintf(fp, "movsd xmm14, [rsp]\n");                                                     \
+    fprintf(fp, "comisd xmm14, xmm15\n");                                                    \
+    fprintf(fp, "xorpd xmm14, xmm14\n");                                                     \
+    fprintf(fp, "%s _mark%p\n", operation, node);                                            \
+    fprintf(fp, "movsd xmm14, [const_0]\n");                                                 \
+    fprintf(fp, "_mark%p:", node);                                                           \
+    fprintf(fp, "sub rsp, 8\n");                                                             \
+    fprintf(fp, "movsd [rsp], xmm14");                                                       \
+    return 0;                                                                                
 
 struct var_info {
     char scope;
@@ -14,6 +48,27 @@ struct var_info {
 struct num_info {
     bool already_exist;
     data_t num;
+};
+
+struct str {
+    oper_codes op_code;
+    const char* cmd_name;
+};
+
+str math_codes[NUM_MATH_FUNCS] = {
+    {ADD_CODE,      "addsd"},
+    {SUB_CODE,      "subsd"},
+    {MUL_CODE,      "mulsd"},
+    {DIV_CODE,      "divsd"},
+};
+
+str log_codes[NUM_LOG_FUNCS] = {
+    {DOUBLE_EQ_CODE,    "je"},
+    {NOT_EQ_CODE,       "jne"},
+    {MORE_CODE,         "ja"},
+    {MORE_OR_EQ_CODE,   "jae"},
+    {LESS_CODE,         "jb"},
+    {LESS_OR_EQ_CODE,   "jbe"},
 };
 
 void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array);
@@ -30,13 +85,17 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
 {
     FILE* fp = fopen("Back_end_nasm/Commands.asm", "w");
 
+    num_const_num++;
     var_info* name_array = (var_info*)calloc((size_t)num_name, sizeof(var_info));
     num_info* num_array = (num_info*)calloc((size_t)num_const_num, sizeof(num_info));
     bool* reg_busy_array = (bool*)calloc(NUM_AVAILABLE_REGS, sizeof(bool));
 
     bool inside_func = false;
     int free_index_num_array = 0;
-    
+
+    num_array[0].num = 1;       //necessary constants
+    free_index_num_array++;
+
     Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, reg_busy_array);
     Set_Data(name_array, num_name, num_array, num_const_num, fp);
 
@@ -55,6 +114,129 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
     free(name_array);
     free(num_array);
     fclose(fp);
+}
+
+int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp)
+{
+    if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
+        Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+
+    if (node->type == OPER_CODE)
+    {
+        switch (node->value.op_code_t)
+        {
+            case FUNC_INIT_CODE:
+                fprintf(fp, "jmp .%p\n", node);
+                fprintf(fp, ".func%d:\n", node->left->value.name_ind);
+                Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "ret\n");
+                fprintf(fp, ".%p:\n", node);
+                return 0;
+
+            case VAR_INIT_CODE:
+            case CHANGE_VAR_CODE:
+                Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "movsd xmm14, [rsp]\n");
+                fprintf(fp, "add rsp, 8\n");
+                if (name_array[node->left->value.name_ind].scope == 'g')
+                    fprintf(fp, "movsd [var%d], xmm14\n", node->left->value.name_ind);
+                else
+                    fprintf(fp, "movsd xmm%d, xmm14\n", name_array[node->left->value.name_ind].reg);
+
+                return 0;
+
+            case FUNC_CALL_CODE:
+                fprintf(fp, "call .func%d\n", node->left->value.name_ind);
+                return 0;
+
+            case IF_CODE:
+                Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "movsd xmm14, [rsp]\n");
+                fprintf(fp, "add rsp, 8\n");
+                fprintf(fp, "xorpd xmm15, xmm15\n");
+                fprintf(fp, "comisd xmm14, xmm15\n");
+                fprintf(fp, "je _mark%p\n", node);
+                Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "_mark%p:\n", node);
+
+            case WHILE_CODE:
+                fprintf(fp, "_mark%p:\n", node->left);
+                Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "movsd xmm14, [rsp]\n");
+                fprintf(fp, "add rsp, 8\n");
+                fprintf(fp, "xorpd xmm15, xmm15\n");
+                fprintf(fp, "comisd xmm14, xmm15\n");
+                fprintf(fp, "je _mark%p\n", node);
+                Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "jmp _mark%p\n", node->left);
+                fprintf(fp, "_mark%p:\n", node);
+
+            default:
+                break;
+        }
+
+        for (int i = 0; i < NUM_MATH_FUNCS; i++)
+        {
+            if (node->value.op_code_t == math_codes[i].op_code)
+            {
+                MATH_FUNCS(math_codes[i].cmd_name)
+            }
+        }
+
+        for (int i = 0; i < NUM_LOG_FUNCS; i++)
+        {
+            if (node->value.op_code_t == log_codes[i].op_code)
+            {
+                MATH_FUNCS(log_codes[i].cmd_name)
+            }
+        }
+    }
+
+    if (node->type == NUM_CODE)
+    {
+        for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
+        {
+            if (Is_Zero(num_array[pos_num_array].num - node->value.num_t))
+            {
+                fprintf(fp, "movsd xmm14, [const_%d]\n", pos_num_array);
+                fprintf(fp, "sub rsp, 8\n");
+                fprintf(fp, "movsd [rsp], xmm14\n");
+                return 0;
+            }
+        }
+
+        fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
+        return 1;
+    }
+
+    else if (node->type == NAME_CODE)
+    {
+        if (name_array[node->value.name_ind].scope == 'g')
+        {
+            fprintf(fp, "movsd xmm14, [var%d]\n", node->value.name_ind);
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "movsd [rsp], xmm14\n");
+            return 0;
+        }
+        
+        else if (name_array[node->value.name_ind].scope == 'l')
+        {   
+            fprintf(fp, "sub rsp, 8\n");
+            fprintf(fp, "movsd [rsp], xmm%d\n", name_array[node->value.name_ind].reg);
+            return 0;
+        }
+
+        fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
+        return 1;
+    }
+
+    if (node->left != NULL)
+        Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
+    
+    if (node->right != NULL && (node->type != BODY_CODE && node->type != TREE_ROOT_CODE))
+        Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
+
+    return 0;
 }
 
 void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array)
@@ -156,69 +338,4 @@ int Free_Reg_Search(bool* reg_busy_array)
 
     fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
     return -1;
-}
-
-int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp)
-{
-    if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
-        Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
-
-    switch (node->value.op_code_t)
-    {
-        case FUNC_INIT_CODE:
-            fprintf(fp, "JMP .%p\n", node);
-            fprintf(fp, ".func%d:\n", node->left->value.name_ind);
-            Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
-            fprintf(fp, "RET\n");
-            fprintf(fp, ".%p:\n", node);
-            return 0;
-
-        case FUNC_CALL_CODE:
-            fprintf(fp, "CALL .func%d\n", node->left->value.name_ind);
-            return 0;
-
-        default:
-            break;
-    }
-
-    if (node->type == NUM_CODE)
-    {
-        for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
-        {
-            if (Is_Zero(num_array[pos_num_array].num - node->value.num_t))
-            {
-                fprintf(fp, "[const_%d]", pos_num_array);
-                return 0;
-            }
-        }
-
-        fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
-        return 1;
-    }
-
-    else if (node->type == NAME_CODE)
-    {
-        if (name_array[node->value.name_ind].scope == 'g')
-        {
-            fprintf(fp, "[var%d]", node->value.name_ind);
-            return 0;
-        }
-        
-        else if (name_array[node->value.name_ind].scope == 'l')
-        {
-            fprintf(fp, "xmm%d", name_array[node->value.name_ind].reg);
-            return 0;
-        }
-
-        fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
-        return 1;
-    }
-
-    if (node->left != NULL)
-        Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
-    
-    if (node->right != NULL && (node->type != BODY_CODE && node->type != TREE_ROOT_CODE))
-        Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
-
-    return 0;
 }
