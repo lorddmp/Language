@@ -11,7 +11,7 @@
 if (node->parent->type == OPER_CODE)            \
 {                                               \
     fprintf(fp, "sub rsp, 8\n");                \
-    fprintf(fp, "movsd [rsp], xmm14");          \
+    fprintf(fp, "movsd [rsp], xmm14\n");        \
 }                                               \
 
 #define MATH_FUNCS(operation)                                                                \
@@ -33,13 +33,14 @@ if (node->parent->type == OPER_CODE)            \
     fprintf(fp, "movsd xmm15, [rsp]\n");                                                     \
     fprintf(fp, "add rsp, 8\n");                                                             \
     fprintf(fp, "movsd xmm14, [rsp]\n");                                                     \
+    fprintf(fp, "add rsp, 8\n");                                                             \
     fprintf(fp, "comisd xmm14, xmm15\n");                                                    \
     fprintf(fp, "xorpd xmm14, xmm14\n");                                                     \
-    fprintf(fp, "%s _mark%p\n", operation, node);                                            \
+    fprintf(fp, "%s _mark%p\n", operation, node->left);                                      \
     fprintf(fp, "movsd xmm14, [const_0]\n");                                                 \
-    fprintf(fp, "_mark%p:", node);                                                           \
+    fprintf(fp, "_mark%p:\n", node->left);                                                   \
     fprintf(fp, "sub rsp, 8\n");                                                             \
-    fprintf(fp, "movsd [rsp], xmm14");                                                       \
+    fprintf(fp, "movsd [rsp], xmm14\n");                                                     \
     return 0;                                                                                \
 }
 
@@ -69,10 +70,10 @@ str math_codes[NUM_MATH_FUNCS] = {
 str log_codes[NUM_LOG_FUNCS] = {
     {DOUBLE_EQ_CODE,    "je"},
     {NOT_EQ_CODE,       "jne"},
-    {MORE_CODE,         "ja"},
-    {MORE_OR_EQ_CODE,   "jae"},
-    {LESS_CODE,         "jb"},
-    {LESS_OR_EQ_CODE,   "jbe"},
+    {MORE_CODE,         "jb"},
+    {MORE_OR_EQ_CODE,   "jbe"},
+    {LESS_CODE,         "ja"},
+    {LESS_OR_EQ_CODE,   "jae"},
 };
 
 void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array);
@@ -100,12 +101,14 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
     num_array[0].num = 1;       //necessary constants
     free_index_num_array++;
 
+    fprintf(fp, "extern my_printf_float\n\n");
+
     Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, reg_busy_array);
     Set_Data(name_array, num_name, num_array, num_const_num, fp);
 
-    fprintf(fp, "section .text\n\n");
-    fprintf(fp, "_Start:\n\n");
-
+    fprintf(fp, "section .text\n");
+    fprintf(fp, "global main\n\n");
+    fprintf(fp, "main:\n\n");
 
     Node_Processing(root_node, name_array, num_name, num_array, num_const_num, fp);
 
@@ -113,6 +116,8 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
     //     putchar(name_array[i]);
 
     // putchar('\n');
+
+    fprintf(fp, "ret");
 
     free(reg_busy_array);
     free(name_array);
@@ -130,11 +135,11 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
         switch (node->value.op_code_t)
         {
             case FUNC_INIT_CODE:
-                fprintf(fp, "jmp .%p\n", node);
-                fprintf(fp, ".func%d:\n", node->left->value.name_ind);
+                fprintf(fp, "jmp _mark%p\n", node);
+                fprintf(fp, "func%d:\n", node->left->value.name_ind);
                 Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
                 fprintf(fp, "ret\n");
-                fprintf(fp, ".%p:\n", node);
+                fprintf(fp, "_mark%p:\n", node);
                 return 0;
 
             case VAR_INIT_CODE:
@@ -150,7 +155,7 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
                 return 0;
 
             case FUNC_CALL_CODE:
-                fprintf(fp, "call .func%d\n", node->left->value.name_ind);
+                fprintf(fp, "call func%d\n", node->left->value.name_ind);
                 return 0;
 
             case IF_CODE:
@@ -177,6 +182,13 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
                 fprintf(fp, "_mark%p:\n", node);
                 return 0;
 
+            case PRINTF_CODE:
+                Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
+                fprintf(fp, "movsd xmm14, [rsp]\n");
+                fprintf(fp, "add rsp, 8\n");
+                fprintf(fp, "call my_printf_float\n");
+                return 0;
+
             default:
                 break;
         }
@@ -187,7 +199,7 @@ int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* 
 
         for (int i = 0; i < NUM_LOG_FUNCS; i++)
             if (node->value.op_code_t == log_codes[i].op_code)
-                MATH_FUNCS(log_codes[i].cmd_name)
+                LOG_FUNCS(log_codes[i].cmd_name)
     }
 
     if (node->type == NUM_CODE)
@@ -321,7 +333,7 @@ void Set_Data(var_info* name_array, int num_name, num_info* num_array, int num_c
 
     for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
         if (num_array[pos_num_array].already_exist == false)
-            fprintf(fp, "const_%d dq %lg\n", pos_num_array, num_array[pos_num_array].num);
+            fprintf(fp, "const_%d dq %.16f\n", pos_num_array, num_array[pos_num_array].num);
 
     fprintf(fp, "\n");
 }
