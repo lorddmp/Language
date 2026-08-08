@@ -7,7 +7,8 @@ massive db 256 dup (0)
 section .rodata
 
 num_mas db "0123456789"
-const_10 dq 10
+superconst_10 dq 10.0
+superconst_67 dq 0x7FFFFFFFFFFFFFFF
 
 ; ---------------------------------------------------------------------------------
 
@@ -21,17 +22,17 @@ my_printf_float:
                     push rdx
                     push rsi
 
-.int_part:          movsd xmm15, xmm14                  ;number in xmm14
+.int_part:          
+                    movsd xmm15, xmm14                  ;number in xmm14
                     roundsd xmm15, xmm15, 3
 
-                    cvttsd2si rdi, xmm15
+                    cvttsd2si rax, xmm15
                     mov rsi, massive                    ;address of outcoming string
                     xor rdx, rdx                        ;len + address in buffer
 
-                    mov rax, rdi
-                    shr rax, 63
-                    cmp rax, 1
-                    mov rax, rdi
+                    movq rdi, xmm14
+                    shr rdi, 63
+                    cmp rdi, 1
                     jne .not_negative
 
                     mov r10, '-'
@@ -80,12 +81,19 @@ my_printf_float:
                     inc rdx                             ;len + 1
                     call .print_printf
 
+                    movq rax, xmm14                     ; xmm14 -> |xmm14|
+                    and rax, [superconst_67]
+                    movq xmm14, rax
+
+                    movq rax, xmm15                     ; xmm15 -> |xmm15|
+                    and rax, [superconst_67]
+                    movq xmm15, rax
+
                     xor rcx, rcx
-                    mov r8, 10
 
 .cvt_frac_in_str:
                     subsd xmm14, xmm15
-                    mulsd xmm14, [const_10]
+                    mulsd xmm14, [superconst_10]
                     movsd xmm15, xmm14
                     roundsd xmm15, xmm15, 3
 
@@ -119,6 +127,7 @@ my_printf_float:
                     inc rdx                             ;len + 1
                     call .print_printf
 
+
                     jmp .exit_printf
 
 
@@ -127,11 +136,9 @@ my_printf_float:
 
 .print_printf:      push rax
                     push rcx
-                    push rdi
                     mov rax, 1                          ;func write
                     mov rdi, 1                          ;stdout
                     syscall
-                    pop rdi
                     pop rcx
                     pop rax
                     xor rdx, rdx
