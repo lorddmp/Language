@@ -208,6 +208,15 @@
                     fprintf(fp, "call my_printf_float\n");
                     return 0;
 
+                case INPUT_CODE:
+                    fprintf(fp, "call my_input_float\n");
+                    if (name_array[node->left->value.name_ind].scope == 'g')
+                        fprintf(fp, "movsd [var%d], xmm14\n", node->left->value.name_ind);
+                    else
+                        fprintf(fp, "movsd xmm%d, xmm14\n", name_array[node->left->value.name_ind].reg);
+
+                    return 0;
+
                 case COTAN_CODE:
                     Node_Processing(node->left, name_array, num_name, num_array, num_const_num, fp);
                     fprintf(fp, "movsd xmm14, [rsp]\n");
@@ -315,7 +324,8 @@
 
     void Connect_Funcs(FILE* fp)
     {
-        fprintf(fp, "extern my_printf_float\n\n");
+        fprintf(fp, "extern my_printf_float\n");
+        fprintf(fp, "extern my_input_float\n");
         fprintf(fp, "extern sin, cos, tan, asin, acos, atan, log, pow\n\n");
     }
 

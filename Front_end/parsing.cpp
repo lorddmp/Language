@@ -189,8 +189,14 @@ Node_t* Get_Input(int* pos_token_array, Node_t** token_array)
     NULL_IF_NODE_WRONG(INPUT_CODE)
     (*pos_token_array)++;
 
-    Node_t* val = Get_Paren(pos_token_array, token_array);
+    ERROR_IF_NODE_WRONG(OPEN_BRAC_CODE, __FILE__, __func__, __LINE__)
+    (*pos_token_array)++;
+
+    Node_t* val = Get_Name(pos_token_array, token_array);
     IF_ERROR_READING(val)
+
+    ERROR_IF_NODE_WRONG(CLOSED_BRAC_CODE, __FILE__, __func__, __LINE__)
+    (*pos_token_array)++;
 
     val = Make_Node(OPER_CODE, {.op_code_t = INPUT_CODE}, val, NULL);
     return val;
