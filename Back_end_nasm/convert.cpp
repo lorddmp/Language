@@ -57,11 +57,6 @@
         Node_t* func_adress;
     };
 
-    struct num_info {
-        bool already_exist;
-        data_t num;
-    };
-
     struct str {
         oper_codes op_code;
         const char* cmd_name;
@@ -95,15 +90,15 @@
 
     void Connect_Funcs(FILE* fp);
 
-    void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array);
+    void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, data_t* num_array, int* free_index_num_array, bool* reg_busy_array);
 
     void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call, Node_t* first_func);
     void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_t* first_func);
 
-    void Set_Data(var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp);
+    void Set_Data(var_info* name_array, int num_name, data_t* num_array, int num_const_num, FILE* fp);
 
     int Free_Reg_Search(bool* reg_busy_array);
-    int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp);
+    int Node_Processing(Node_t* node, var_info* name_array, int num_name, data_t* num_array, int num_const_num, FILE* fp);
 
     void Converting(Node_t* root_node, int num_name, int num_const_num)
     {
@@ -111,30 +106,25 @@
 
         num_const_num++;
         var_info* name_array = (var_info*)calloc((size_t)num_name, sizeof(var_info));
-        num_info* num_array = (num_info*)calloc((size_t)num_const_num, sizeof(num_info));
+        data_t* num_array = (data_t*)calloc((size_t)num_const_num, sizeof(data_t));
         bool* reg_busy_array = (bool*)calloc(NUM_AVAILABLE_REGS, sizeof(bool));
 
         bool inside_func = false;
         int free_index_num_array = 0;
 
-        num_array[0].num = 1;       //necessary constants
+        num_array[free_index_num_array] = 1;       //necessary constants
         free_index_num_array++;
 
         Connect_Funcs(fp);
 
         Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, reg_busy_array);
-        Set_Data(name_array, num_name, num_array, num_const_num, fp);
+        Set_Data(name_array, num_name, num_array, free_index_num_array, fp);
 
         fprintf(fp, "section .text\n");
         fprintf(fp, "global main\n\n");
         fprintf(fp, "main:\n\n");
 
         Node_Processing(root_node, name_array, num_name, num_array, num_const_num, fp);
-
-        // for (int i = 0; i < num_name; i++)
-        //     putchar(name_array[i]);
-
-        // putchar('\n');
 
         fprintf(fp, "ret");
 
@@ -144,7 +134,7 @@
         fclose(fp);
     }
 
-    int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp)
+    int Node_Processing(Node_t* node, var_info* name_array, int num_name, data_t* num_array, int num_const_num, FILE* fp)
     {
         if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
             Node_Processing(node->right, name_array, num_name, num_array, num_const_num, fp);
@@ -279,7 +269,7 @@
         {
             for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
             {
-                if (Is_Zero(num_array[pos_num_array].num - node->value.num_t))
+                if (Is_Zero(num_array[pos_num_array] - node->value.num_t))
                 {
                     fprintf(fp, "movsd xmm14, [const_%d]\n", pos_num_array);
                     fprintf(fp, "sub rsp, 8\n");
@@ -329,7 +319,7 @@
         fprintf(fp, "extern sin, cos, tan, asin, acos, atan, log, pow\n\n");
     }
 
-    void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, bool* reg_busy_array)
+    void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, data_t* num_array, int* free_index_num_array, bool* reg_busy_array)
     {
         if (node->value.op_code_t == FUNC_INIT_CODE)
         {
@@ -351,13 +341,18 @@
 
         else if (node->type == NUM_CODE)
         {
-            num_array[*free_index_num_array].num = node->value.num_t;
-
             for (int i = 0; i < *free_index_num_array; i++)
-                if (Is_Zero(num_array[i].num - node->value.num_t))
-                    num_array[*free_index_num_array].already_exist = true;
+            {
+                if (Is_Zero(num_array[i] - node->value.num_t))
+                    break;
 
-            (*free_index_num_array)++;
+                else if (i == *free_index_num_array - 1)
+                {
+                    num_array[*free_index_num_array] = node->value.num_t;
+                    (*free_index_num_array)++;
+                    break;
+                }
+            }
         }
 
         if (node->right != NULL)
@@ -403,7 +398,7 @@
             Unlock_Regs(node->right, reg_busy_array, name_array, first_func);
     }
 
-    void Set_Data(var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp)
+    void Set_Data(var_info* name_array, int num_name, data_t* num_array, int num_const_num, FILE* fp)
     { 
         fprintf(fp, "section .data\n\n");
 
@@ -412,8 +407,7 @@
                 fprintf(fp, "var%d dq 0\n", pos_name_array);
 
         for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
-            if (num_array[pos_num_array].already_exist == false)
-                fprintf(fp, "const_%d dq %.16f\n", pos_num_array, num_array[pos_num_array].num);
+            fprintf(fp, "const_%d dq %.16f\n", pos_num_array, num_array[pos_num_array]);
 
         fprintf(fp, "\n");
     }
