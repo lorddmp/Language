@@ -11,7 +11,11 @@
 #define INPUT_DATA_SIZE 81
 #define PRINTF_DATA_SIZE 282
 #define DATA_SHIFT ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE + INPUT_DATA_SIZE + PRINTF_DATA_SIZE
-#define CODE_SHIFT 2048
+
+#define INPUT_CODE_SIZE 214
+#define PRINTF_CODE_SIZE 340
+#define FUNC_SHIFT 2048
+#define CODE_SHIFT FUNC_SHIFT + PRINTF_CODE_SIZE + INPUT_CODE_SIZE
 
 #define NUM_AVAILABLE_REGS 14
 #define NUM_ARITHMETIC_FUNCS 4
@@ -89,8 +93,10 @@ void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_
 
 void Set_Data(char* byte_array, num_info* num_array, int num_const_num);
 
-int Free_Reg_Search(bool* reg_busy_array);
+void Set_InOutput_Funcs(char* byte_array);
+
 int Node_Processing(Node_t* node, var_info* name_array, int num_name, num_info* num_array, int num_const_num, FILE* fp);
+int Free_Reg_Search(bool* reg_busy_array);
 
 void Converting(Node_t* root_node, int num_name, int num_const_num)
 {
@@ -115,10 +121,8 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
 
     Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, &free_index_data, reg_busy_array);
 
-    for (int i = 0; i < free_index_num_array; i++)
-        printf("%lg/%ld ", num_array[i].num, num_array[i].adr_data);
-
     Set_Data(byte_array, num_array, free_index_num_array);
+    Set_InOutput_Funcs(byte_array);
 
     // Node_Processing(root_node, name_array, num_name, num_array, num_const_num, fp);
 
@@ -374,6 +378,17 @@ void Set_Data(char* byte_array, num_info* num_array, int num_const_num)
 
     for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
         *(data_t*)(byte_array + num_array[pos_num_array].adr_data) = num_array[pos_num_array].num;
+}
+
+void Set_InOutput_Funcs(char* byte_array)
+{
+    FILE* fp_input = fopen("Back_end_binary/input_code.o", "r");
+    fread(&byte_array[FUNC_SHIFT], sizeof(char), INPUT_CODE_SIZE, fp_input);
+    fclose(fp_input);
+
+    FILE* fp_printf = fopen("Back_end_binary/printf_code.o", "r");
+    fread(&byte_array[FUNC_SHIFT + INPUT_CODE_SIZE], sizeof(char), PRINTF_CODE_SIZE, fp_printf);
+    fclose(fp_printf);
 }
 
 int Free_Reg_Search(bool* reg_busy_array)
