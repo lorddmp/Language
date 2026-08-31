@@ -1,3 +1,5 @@
+[BITS 64]
+
 section .data
 
 massive db 256 dup (0)

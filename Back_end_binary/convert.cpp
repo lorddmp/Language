@@ -10,7 +10,8 @@
 #define PROGRAM_HEADER_SIZE 56
 #define INPUT_DATA_SIZE 81
 #define PRINTF_DATA_SIZE 282
-#define OVERALL_SHIFT ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE + INPUT_DATA_SIZE + PRINTF_DATA_SIZE
+#define DATA_SHIFT ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE + INPUT_DATA_SIZE + PRINTF_DATA_SIZE
+#define CODE_SHIFT 2048
 
 #define NUM_AVAILABLE_REGS 14
 #define NUM_ARITHMETIC_FUNCS 4
@@ -105,7 +106,7 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
 
     bool inside_func = false;
     int free_index_num_array = 0;
-    int free_index_data = OVERALL_SHIFT;
+    int free_index_data = DATA_SHIFT;
 
     num_array[free_index_num_array].num = 1;       //necessary constant
     num_array[free_index_num_array].adr_data = free_index_data;
