@@ -321,19 +321,19 @@ int Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num
         Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, false, node->right);
     }
 
-    else if (node->type == NAME_CODE && node->parent->value.op_code_t != FUNC_INIT_CODE && node->parent->value.op_code_t != FUNC_CALL_CODE)
+    else if (node->value.op_code_t == VAR_INIT_CODE)
     {
         if (*inside_func == false)
         {
-            name_array[node->value.name_ind].scope = 'g'; //global var
-            name_array[node->value.name_ind].adr_data = *free_index_data;
+            name_array[node->left->value.name_ind].scope = 'g'; //global var
+            name_array[node->left->value.name_ind].adr_data = *free_index_data;
             (*free_index_data) += 8;
         }
         else
         {
-            name_array[node->value.name_ind].scope = 'l'; //local var
-            name_array[node->value.name_ind].reg = Free_Reg_Search(reg_busy_array);
-            ERROR_IF_VALUES_EQUAL(name_array[node->value.name_ind].reg, -1, __FILE__, __func__, __LINE__)
+            name_array[node->left->value.name_ind].scope = 'l'; //local var
+            name_array[node->left->value.name_ind].reg = Free_Reg_Search(reg_busy_array);
+            ERROR_IF_VALUES_EQUAL(name_array[node->left->value.name_ind].reg, -1, __FILE__, __func__, __LINE__)
         }
     }
 

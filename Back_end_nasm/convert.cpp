@@ -328,14 +328,14 @@
             Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, false, node->right);
         }
 
-        else if (node->type == NAME_CODE && node->parent->value.op_code_t != FUNC_INIT_CODE && node->parent->value.op_code_t != FUNC_CALL_CODE)
+        else if (node->value.op_code_t == VAR_INIT_CODE)
         {
             if (*inside_func == false)
-                name_array[node->value.name_ind].scope = 'g'; //global var
+                name_array[node->left->value.name_ind].scope = 'g'; //global var
             else
             {
-                name_array[node->value.name_ind].scope = 'l'; //local var
-                name_array[node->value.name_ind].reg = Free_Reg_Search(reg_busy_array);
+                name_array[node->left->value.name_ind].scope = 'l'; //local var
+                name_array[node->left->value.name_ind].reg = Free_Reg_Search(reg_busy_array);
             }
         }
 
