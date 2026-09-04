@@ -22,16 +22,30 @@
 #define NUM_ARITHMETIC_FUNCS 4
 #define NUM_LOG_FUNCS 6
 
+#define ERROR_IF_VALUES_EQUAL(val1, val2, file, func, line)                                  \
+if (val1 == val2)                                                                            \
+{                                                                                            \
+    fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", file, func, line);        \
+    return -1;                                                                               \
+}
+
+#define ERROR_IF_VALUES_NOT_EQUAL(val1, val2, file, func, line)                              \
+if (val1 != val2)                                                                            \
+{                                                                                            \
+    fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", file, func, line);        \
+    return -1;                                                                               \
+}
+
 struct var_info {
     char scope;
     int reg;
     Node_t* func_adress;
-    long adr_data;
+    int adr_data;
 };
 
 struct num_info {
     data_t num;
-    long adr_data;
+    int adr_data;
 };
 
 struct str_arithm {
@@ -45,41 +59,41 @@ struct str_log {
 };
 
 str_arithm arithm_codes[NUM_ARITHMETIC_FUNCS] = {
-    {ADD_CODE,      0xF2440F58},
-    {SUB_CODE,      0xF2440F5C},
-    {MUL_CODE,      0xF2440F59},
-    {DIV_CODE,      0xF2440F5E},
+    {ADD_CODE,      0x580F45F2},
+    {SUB_CODE,      0x5C0F45F2},
+    {MUL_CODE,      0x590F45F2},
+    {DIV_CODE,      0x5E0F45F2},
 };
 
 str_log log_codes[NUM_LOG_FUNCS] = {
-    {DOUBLE_EQ_CODE,    0x74},
-    {NOT_EQ_CODE,       0x75},
-    {MORE_CODE,         0x72},
-    {MORE_OR_EQ_CODE,   0x76},
-    {LESS_CODE,         0x77},
-    {LESS_OR_EQ_CODE,   0x73},
+    {DOUBLE_EQ_CODE,    0x75},
+    {NOT_EQ_CODE,       0x74},
+    {MORE_CODE,         0x76},
+    {MORE_OR_EQ_CODE,   0x72},
+    {LESS_CODE,         0x73},
+    {LESS_OR_EQ_CODE,   0x77},
 };
 
-void Set_Headers(char* byte_array);
+int Set_Headers(char* byte_array);
 
-void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, int* free_index_data, bool* reg_busy_array);
+int Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, int* free_index_data, bool* reg_busy_array);
 
 void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call, Node_t* first_func);
 void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_t* first_func);
 
-void Set_Data(char* byte_array, num_info* num_array, int num_const_num);
+int Set_Data(char* byte_array, num_info* num_array, int num_const_num);
 
-void Set_InOutput_Funcs(char* byte_array);
+int Set_InOutput_Funcs(char* byte_array);
 
 int Node_Processing(Node_t* node, char* byte_array,  var_info* name_array, int num_name, num_info* num_array, int num_const_num, int* free_index_code, FILE* fp);
 int Free_Reg_Search(bool* reg_busy_array);
 
-void Converting(Node_t* root_node, int num_name, int num_const_num)
+int Converting(Node_t* root_node, int num_name, int num_const_num)
 {
     FILE* fp = fopen("Back_end_binary/proga", "w");
 
     char byte_array[SEGMENT_SIZE] = {};
-    Set_Headers(byte_array);
+    ERROR_IF_VALUES_EQUAL(Set_Headers(byte_array), -1, __FILE__, __func__, __LINE__)
 
     num_const_num++;
     var_info* name_array = (var_info*)calloc((size_t)num_name, sizeof(var_info));
@@ -96,12 +110,13 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
     free_index_data += 8;
     free_index_num_array++;
 
-    Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, &free_index_data, reg_busy_array);
+    ERROR_IF_VALUES_EQUAL(Set_Var_Num_Array(root_node, name_array, &inside_func, num_array, &free_index_num_array, &free_index_data, reg_busy_array), -1, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_EQUAL(Set_Data(byte_array, num_array, free_index_num_array), -1, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_EQUAL(Set_InOutput_Funcs(byte_array), -1, __FILE__, __func__, __LINE__)
 
-    Set_Data(byte_array, num_array, free_index_num_array);
-    Set_InOutput_Funcs(byte_array);
+    ERROR_IF_VALUES_EQUAL(Node_Processing(root_node, byte_array, name_array, num_name, num_array, num_const_num, &free_index_code, fp), -1, __FILE__, __func__, __LINE__)
 
-    Node_Processing(root_node, byte_array, name_array, num_name, num_array, num_const_num, &free_index_code, fp);
+    EXIT_PROGRAM
 
     fwrite(byte_array, sizeof(char), SEGMENT_SIZE, fp);
 
@@ -109,6 +124,8 @@ void Converting(Node_t* root_node, int num_name, int num_const_num)
     free(name_array);
     free(num_array);
     fclose(fp);
+
+    return 0;
 }
 
 int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int num_name, num_info* num_array, int num_const_num, int* free_index_code, FILE* fp)
@@ -116,31 +133,34 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
     int start_pos_byte_array = *free_index_code;
 
     if (node->type == BODY_CODE || node->type == TREE_ROOT_CODE)
-        Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+        {ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)}
 
     else if (node->type == OPER_CODE)
     {
         switch (node->value.op_code_t)
         {
             case FUNC_INIT_CODE:
+            {
                 byte_array[*free_index_code] = JMP_CODE;
                 (*free_index_code)++;
 
                 int index_for_shift = *free_index_code;
                 (*free_index_code) += 4;
 
-                Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
 
                 byte_array[*free_index_code] = RET_CODE;
                 (*free_index_code)++;
 
-                *(int*)(byte_array + index_for_shift) = *free_index_code - index_for_shift;
+                *(unsigned int*)(byte_array + index_for_shift) = *free_index_code - index_for_shift;
                 
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case VAR_INIT_CODE:
             case CHANGE_VAR_CODE:
-                Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+            {
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
                 POPR_XMM14
                 if (name_array[node->left->value.name_ind].scope == 'g')
                     {MOVSD_VAR_XMM14(name_array[node->left->value.name_ind].adr_data)}
@@ -148,57 +168,68 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
                     {MOVSD_XMM_XMM14(name_array[node->left->value.name_ind].reg)}
 
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case FUNC_CALL_CODE:
+            {
                 CALL_FUNC(SEGMENT_BASE_ADRESS + name_array[node->left->value.name_ind].adr_data)
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case IF_CODE:
-                Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+            {
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
                 POPR_XMM14
                 XORPD_XMM15_XMM15
                 COMISD_XMM14_XMM15
 
-                byte_array[*free_index_code] = JE_CODE;
-                (*free_index_code)++;
+                *(short*)(byte_array + *free_index_code) = JE_CODE;
+                (*free_index_code) += 2;
 
-                int index_for_shift = *free_index_code;
+                int index_for_shift_if = *free_index_code;
                 (*free_index_code) += 4;
 
-                Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
 
-                *(int*)(byte_array + index_for_shift) = *free_index_code - index_for_shift;
+                *(unsigned int*)(byte_array + index_for_shift_if) = *free_index_code - index_for_shift_if - 4;
                 
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case WHILE_CODE:
-                int index_for_shift_jmp = *free_index_code;
+            {
+                int index_for_shift_jmp_while = *free_index_code;
 
-                Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
                 POPR_XMM14
                 XORPD_XMM15_XMM15
                 COMISD_XMM14_XMM15
 
-                byte_array[*free_index_code] = JE_CODE;
-                (*free_index_code)++;
-                int index_for_shift_je = *free_index_code;
+                *(short*)(byte_array + *free_index_code) = 0x840F; // je
+                (*free_index_code) += 2;
+                int index_for_shift_je_while = *free_index_code;
                 (*free_index_code) += 4;
 
-                Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
                 byte_array[*free_index_code] = JMP_CODE;
                 (*free_index_code)++;
 
-                *(int*)(byte_array + *free_index_code) = index_for_shift_jmp - *free_index_code;
-                *(int*)(byte_array + index_for_shift_je) = *free_index_code - index_for_shift_je;
+                *(unsigned int*)(byte_array + *free_index_code) = index_for_shift_jmp_while - *free_index_code - 4;
+                (*free_index_code) += 4;
+                *(unsigned int*)(byte_array + index_for_shift_je_while) = *free_index_code - index_for_shift_je_while - 4;
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case PRINTF_CODE:
-                Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+            {
+                ERROR_IF_VALUES_EQUAL(Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
                 POPR_XMM14
                 CALL_PRINTF
                 return *free_index_code - start_pos_byte_array;
+            }
 
             case INPUT_CODE:
+            {
                 CALL_INPUT
                 if (name_array[node->left->value.name_ind].scope == 'g')
                     {MOVSD_VAR_XMM14(name_array[node->left->value.name_ind].adr_data)} 
@@ -206,6 +237,7 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
                     {MOVSD_XMM_XMM14(name_array[node->left->value.name_ind].reg)}
 
                 return *free_index_code - start_pos_byte_array;
+            }
 
             default:
                 break;
@@ -233,7 +265,7 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
         }
 
         fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
-        return 1;
+        return -1;
     }
 
     else if (node->type == NAME_CODE)
@@ -252,30 +284,34 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
         }
 
         fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
-        return 1;
+        return -1;
     }
 
     if (node->left != NULL)
-        Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+        {ERROR_IF_VALUES_EQUAL(Node_Processing(node->left, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)}
         
     if (node->right != NULL && (node->type != BODY_CODE && node->type != TREE_ROOT_CODE))
-        Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp);
+        {ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)}
 
     return 0;
 }
 
-void Set_Headers(char* byte_array)
+int Set_Headers(char* byte_array)
 {
-    FILE* fp = fopen("Back_end_binary/ELF_header", "r");
-    fread(byte_array, sizeof(char), ELF_HEADER_SIZE, fp);
-    fclose(fp);
+    FILE* fp_ELF = fopen("Back_end_binary/ELF_header", "r");
+    ERROR_IF_VALUES_EQUAL(fp_ELF, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(byte_array, sizeof(char), ELF_HEADER_SIZE, fp_ELF), ELF_HEADER_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_ELF);
 
-    FILE* fpp = fopen("Back_end_binary/Program_header", "r");
-    fread(&byte_array[ELF_HEADER_SIZE], sizeof(char), PROGRAM_HEADER_SIZE, fpp);
-    fclose(fpp);
+    FILE* fp_program = fopen("Back_end_binary/Program_header", "r");
+    ERROR_IF_VALUES_EQUAL(fp_ELF, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(&byte_array[ELF_HEADER_SIZE], sizeof(char), PROGRAM_HEADER_SIZE, fp_program), PROGRAM_HEADER_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_program);
+
+    return 0;
 }
 
-void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, int* free_index_data, bool* reg_busy_array)
+int Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num_info* num_array, int* free_index_num_array, int* free_index_data, bool* reg_busy_array)
 {
     if (node->value.op_code_t == FUNC_INIT_CODE)
     {
@@ -297,6 +333,7 @@ void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, nu
         {
             name_array[node->value.name_ind].scope = 'l'; //local var
             name_array[node->value.name_ind].reg = Free_Reg_Search(reg_busy_array);
+            ERROR_IF_VALUES_EQUAL(name_array[node->value.name_ind].reg, -1, __FILE__, __func__, __LINE__)
         }
     }
 
@@ -320,16 +357,18 @@ void Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, nu
     }
 
     if (node->right != NULL)
-        Set_Var_Num_Array(node->right, name_array, inside_func, num_array, free_index_num_array, free_index_data, reg_busy_array);
+        {ERROR_IF_VALUES_EQUAL(Set_Var_Num_Array(node->right, name_array, inside_func, num_array, free_index_num_array, free_index_data, reg_busy_array), -1, __FILE__, __func__, __LINE__)}
 
     if (node->left != NULL)
-        Set_Var_Num_Array(node->left, name_array, inside_func, num_array, free_index_num_array, free_index_data, reg_busy_array);
+        {ERROR_IF_VALUES_EQUAL(Set_Var_Num_Array(node->left, name_array, inside_func, num_array, free_index_num_array, free_index_data, reg_busy_array), -1, __FILE__, __func__, __LINE__)}
 
     if (node->value.op_code_t == FUNC_INIT_CODE)
     {
         Unlock_Regs(node->right, reg_busy_array, name_array, node->right);
         *inside_func = false;
     }
+
+    return 0;
 }
 
 void Ban_Regs_From_Calls(Node_t* node, bool* reg_busy_array, var_info* name_array, bool inside_call, Node_t* first_func)
@@ -362,31 +401,37 @@ void Unlock_Regs(Node_t* node, bool* reg_busy_array, var_info* name_array, Node_
         Unlock_Regs(node->right, reg_busy_array, name_array, first_func);
 }
 
-void Set_Data(char* byte_array, num_info* num_array, int num_const_num)
+int Set_Data(char* byte_array, num_info* num_array, int num_const_num)
 {
-    //input_data
-    FILE* fpp1 = fopen("Back_end_binary/input_data", "r");
-    fread(&byte_array[ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE], sizeof(char), INPUT_DATA_SIZE, fpp1);
-    fclose(fpp1);
+    FILE* fp_input_data = fopen("Back_end_binary/input_data", "r");
+    ERROR_IF_VALUES_EQUAL(fp_input_data, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(&byte_array[ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE], sizeof(char), INPUT_DATA_SIZE, fp_input_data), INPUT_DATA_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_input_data);
 
-    //printf_data
-    FILE* fpp2 = fopen("Back_end_binary/printf_data", "r");
-    fread(&byte_array[ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE + INPUT_DATA_SIZE], sizeof(char), PRINTF_DATA_SIZE, fpp2);
-    fclose(fpp2);
+    FILE* fp_printf_data = fopen("Back_end_binary/printf_data", "r");
+    ERROR_IF_VALUES_EQUAL(fp_printf_data, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(&byte_array[ELF_HEADER_SIZE + PROGRAM_HEADER_SIZE + INPUT_DATA_SIZE], sizeof(char), PRINTF_DATA_SIZE, fp_printf_data), PRINTF_DATA_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_printf_data);
 
     for (int pos_num_array = 0; pos_num_array < num_const_num; pos_num_array++)
         *(data_t*)(byte_array + num_array[pos_num_array].adr_data) = num_array[pos_num_array].num;
+
+    return 0;
 }
 
-void Set_InOutput_Funcs(char* byte_array)
+int Set_InOutput_Funcs(char* byte_array)
 {
-    FILE* fp_input = fopen("Back_end_binary/input_code.o", "r");
-    fread(&byte_array[FUNC_SHIFT], sizeof(char), INPUT_CODE_SIZE, fp_input);
-    fclose(fp_input);
+    FILE* fp_input_code = fopen("Back_end_binary/input_code.o", "r");
+    ERROR_IF_VALUES_EQUAL(fp_input_code, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(&byte_array[FUNC_SHIFT], sizeof(char), INPUT_CODE_SIZE, fp_input_code), INPUT_CODE_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_input_code);
 
-    FILE* fp_printf = fopen("Back_end_binary/printf_code.o", "r");
-    fread(&byte_array[FUNC_SHIFT + INPUT_CODE_SIZE], sizeof(char), PRINTF_CODE_SIZE, fp_printf);
-    fclose(fp_printf);
+    FILE* fp_printf_code = fopen("Back_end_binary/printf_code.o", "r");
+    ERROR_IF_VALUES_EQUAL(fp_printf_code, NULL, __FILE__, __func__, __LINE__)
+    ERROR_IF_VALUES_NOT_EQUAL(fread(&byte_array[FUNC_SHIFT + INPUT_CODE_SIZE], sizeof(char), PRINTF_CODE_SIZE, fp_printf_code), PRINTF_CODE_SIZE, __FILE__, __func__, __LINE__);
+    fclose(fp_printf_code);
+
+    return 0;
 }
 
 int Free_Reg_Search(bool* reg_busy_array)
@@ -397,6 +442,5 @@ int Free_Reg_Search(bool* reg_busy_array)
             return i;
     }
 
-    fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
     return -1;
 }
