@@ -369,7 +369,7 @@ Node_t* Get_TrigLn(int* pos_token_array, Node_t** token_array)
     // printf("Get_trigln\n");
     Node_t* val = NULL;
 
-    if (token_array[*pos_token_array]->value.op_code_t >= SIN_CODE && token_array[*pos_token_array]->value.op_code_t <= LN_CODE)
+    if (token_array[*pos_token_array]->type == OPER_CODE && token_array[*pos_token_array]->value.op_code_t >= SIN_CODE && token_array[*pos_token_array]->value.op_code_t <= LN_CODE)
     {
         value_dif op = {.op_code_t = token_array[*pos_token_array]->value.op_code_t};
         (*pos_token_array)++;

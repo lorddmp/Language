@@ -104,6 +104,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
 
                 pos_code += oper_array[pos_opers].len;
                 token_array[pos_tokens] = Make_Node(OPER_CODE, {.op_code_t = oper_array[pos_opers].op_code});
+                // printf("token: oper_code = %d\n", oper_array[pos_opers].op_code);
                 found = true;
                 break;
             }
@@ -115,6 +116,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
         else if (sscanf(&code_array[pos_code], SPEC "%n", &num, &skip) != 0)
         {
             token_array[pos_tokens] = Make_Node(NUM_CODE, {.num_t = num});
+            // printf("token: num = %lg\n", num);
             pos_code += skip;
             found = true;
         }
@@ -127,6 +129,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
                 if (strncmp(name, name_array[j], (size_t)skip) == 0)
                 {
                     token_array[pos_tokens] = Make_Node(NAME_CODE, {.name_ind = j});
+                    // printf("token: old var = %d\n", j);
                     pos_code += skip;
                     found = true;
 
@@ -138,6 +141,7 @@ Node_t** Tokenize(char** name_array, int size_name_array, int* num_name, int* nu
             {
                 name_array[*num_name] = strdup(name);
                 token_array[pos_tokens] = Make_Node(NAME_CODE, {.name_ind = *num_name});
+                // printf("token: new var = %d\n", *num_name);
                 pos_code += skip;
                 (*num_name)++;
                 found = true;

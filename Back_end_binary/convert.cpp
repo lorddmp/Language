@@ -147,12 +147,14 @@ int Node_Processing(Node_t* node, char* byte_array, var_info* name_array, int nu
                 int index_for_shift = *free_index_code;
                 (*free_index_code) += 4;
 
+                name_array[node->left->value.name_ind].adr_data = *free_index_code;
+
                 ERROR_IF_VALUES_EQUAL(Node_Processing(node->right, byte_array, name_array, num_name, num_array, num_const_num, free_index_code, fp), -1, __FILE__, __func__, __LINE__)
 
                 byte_array[*free_index_code] = RET_CODE;
                 (*free_index_code)++;
 
-                *(unsigned int*)(byte_array + index_for_shift) = *free_index_code - index_for_shift;
+                *(unsigned int*)(byte_array + index_for_shift) = *free_index_code - index_for_shift - 4;
                 
                 return *free_index_code - start_pos_byte_array;
             }
@@ -317,7 +319,6 @@ int Set_Var_Num_Array(Node_t* node, var_info* name_array, bool* inside_func, num
     {
         *inside_func = true;
         name_array[node->left->value.name_ind].func_adress = node->right;
-        name_array[node->value.name_ind].adr_data = *free_index_data;
         Ban_Regs_From_Calls(node->right, reg_busy_array, name_array, false, node->right);
     }
 
@@ -439,7 +440,10 @@ int Free_Reg_Search(bool* reg_busy_array)
     for (int i = 0; i < NUM_AVAILABLE_REGS; i++)
     {
         if (reg_busy_array[i] == false)
+        {
+            reg_busy_array[i] = true;
             return i;
+        }
     }
 
     return -1;

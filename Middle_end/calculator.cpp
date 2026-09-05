@@ -39,6 +39,7 @@ data_t Calculate(Node_t* node, errors* err)
 {
     if (node == NULL)
         return 0;
+        
     if (node->type == NUM_CODE)
         return node->value.num_t;
     else if (node->type == NAME_CODE)
@@ -49,7 +50,7 @@ data_t Calculate(Node_t* node, errors* err)
         data_t b = Calculate(node->right, err);
         if (isnan(a) || isnan(b))
             return NAN;
-        
+
         for (int i = 0; i < NUM_MATH_AND_LOG_OPER; i++)
         {
             if (mas_functions[i].func_code == node->value.op_code_t)

@@ -31,7 +31,7 @@ data_t DIV_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -52,7 +52,7 @@ data_t DOUBLE_EQ_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -68,7 +68,7 @@ data_t NOT_EQ_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -90,7 +90,7 @@ data_t STEPEN_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL || node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -108,7 +108,7 @@ data_t funcname(Node_t* node, errors* err)                \
 {                                                                       \
     if (node->left == NULL && node->right == NULL)                      \
     {                                                                   \
-        fprintf (stderr, "Empty node where it needs to be filled\n");   \
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);   \
         *err = NODE_NULL;                                               \
         return 1;                                                       \
     }                                                                   \
@@ -131,7 +131,7 @@ data_t COTAN_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -160,7 +160,7 @@ data_t ARCCOTAN_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }
@@ -183,7 +183,7 @@ data_t LN_CASE(Node_t* node, errors* err)
 {
     if (node->left == NULL && node->right == NULL)
     {
-        fprintf (stderr, "Empty node where it needs to be filled\n");
+        fprintf (stderr, "Empty node where it needs to be filled: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);
         *err = NODE_NULL;
         return 1;
     }

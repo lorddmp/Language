@@ -417,7 +417,10 @@
         for (int i = 0; i < NUM_AVAILABLE_REGS; i++)
         {
             if (reg_busy_array[i] == false)
+            {
+                reg_busy_array[i] = true;
                 return i;
+            }
         }
 
         fprintf(stderr, "ERROR in file: %s, function: %s, line: %d\n", __FILE__, __func__, __LINE__);

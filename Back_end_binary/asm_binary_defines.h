@@ -67,7 +67,7 @@
                             (*free_index_code) += 4;
 
 #define MOVSD_XMM_XMM14(reg)                                                                \
-                            *(byte_array + *free_index_code) = 0xF7;                        \
+                            *(byte_array + *free_index_code) = 0xF2;                        \
                             (*free_index_code)++;                                           \
                                                                                             \
                             if (reg < 8)                                                    \
