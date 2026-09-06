@@ -1,7 +1,7 @@
 #ifndef ASM_BINARY_DEFINES
 #define ASM_BINARY_DEFINES
 
-#define JE_CODE (char)0x840F
+#define JE_CODE (short)0x840F
 #define JMP_CODE (char)0xE9
 #define RET_CODE (char)0xC3
 
