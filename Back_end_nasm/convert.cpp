@@ -80,12 +80,12 @@
     };  
 
     str log_codes[NUM_LOG_FUNCS] = {
-        {DOUBLE_EQ_CODE,    "je"},
-        {NOT_EQ_CODE,       "jne"},
-        {MORE_CODE,         "jb"},
-        {MORE_OR_EQ_CODE,   "jbe"},
-        {LESS_CODE,         "ja"},
-        {LESS_OR_EQ_CODE,   "jae"},
+        {DOUBLE_EQ_CODE,    "jne"},
+        {NOT_EQ_CODE,       "je"},
+        {MORE_CODE,         "jbe"},
+        {MORE_OR_EQ_CODE,   "jb"},
+        {LESS_CODE,         "jae"},
+        {LESS_OR_EQ_CODE,   "ja"},
     };
 
     void Connect_Funcs(FILE* fp);
